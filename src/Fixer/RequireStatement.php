@@ -1,6 +1,7 @@
 <?php
 namespace RequirePathFixer\Fixer;
 
+use RequirePathFixer\Exceptions\EvalException;
 use Webmozart\PathUtil\Path;
 
 class RequireStatement
@@ -70,13 +71,29 @@ class RequireStatement
         // Return a file path close to the absolute path as much as possible
         if ($this->type == 'variable') {
             return null;
-        } elseif ($this->haveMagicConstant()) {
-            return realpath($this->dir() . $this->getPathStringToken());
-        } elseif ($token = $this->firstToken(array(T_CONSTANT_ENCAPSED_STRING))) {
-            return $this->getPathStringToken();
-        }
+        } else {
+            $code = 'return ';
+            foreach ($this->tokens as $token) {
+                if (isset($token[0]) && in_array($token[0], array(T_REQUIRE, T_REQUIRE_ONCE, T_INCLUDE, T_INCLUDE_ONCE))) {
+                    continue;
+                } elseif (isset($token[0]) && $token[0] == T_FILE) {
+                    $code .= "'" . $this->filePath . "'";
+                } elseif (isset($token[0]) && $token[0] == T_DIR) {
+                    $code .= "'" . $this->dir() . "'";
+                } elseif (is_array($token)) {
+                    $code .= $token[1];
+                } else {
+                    $code .= $token;
+                }
+            }
 
-        throw new \LogicException();
+            $path = eval($code);
+            if (empty($path)) {
+                throw new EvalException($code, $path);
+            }
+
+            return Path::canonicalize($path);
+        }
     }
 
     private function dir()

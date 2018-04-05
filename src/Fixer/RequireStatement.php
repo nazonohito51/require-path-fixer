@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: s.kawashima
- * Date: 2018/04/03
- * Time: 16:19
- */
-
 namespace RequirePathFixer\Fixer;
 
 use Webmozart\PathUtil\Path;
@@ -15,8 +8,6 @@ class RequireStatement
     private $filePath;
     private $tokenIndex;
     private $tokens;
-
-//    const TYPE = array('absolute', 'relative', 'guess', 'variable', 'unexpected');
 
     public function __construct($filePath, $tokenIndex, array $tokens)
     {

@@ -1,0 +1,32 @@
+{
+  "name": "nazonohito51/require-path-fixer",
+  "description": "Fix require/include path",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "kawashima",
+      "email": "nazonohito51@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "RequirePathFixer\\": "src/"
+    }
+  },
+  "require": {
+    "php": ">=5.3.3",
+    "webmozart/path-util": "^2.3",
+    "symfony/finder": "^2.6",
+    "phplucidframe/console-table": "^1.2"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "*",
+    "mockery/mockery": "*"
+  },
+  "config": {
+    "platform": {
+      "php": "5.3.3"
+    }
+  }
+}

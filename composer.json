@@ -24,9 +24,7 @@
     "phpunit/phpunit": "*",
     "mockery/mockery": "*"
   },
-  "config": {
-    "platform": {
-      "php": "5.3.3"
-    }
-  }
+  "bin": [
+    "bin/require-path-fixer"
+  ]
 }

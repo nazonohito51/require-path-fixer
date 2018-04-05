@@ -8,12 +8,36 @@ class RequireStatement
     private $filePath;
     private $tokenIndex;
     private $tokens;
+    private $type;
+
+//    const TYPE = array('absolute', 'relative', 'guess', 'variable', 'unexpected');
 
     public function __construct($filePath, $tokenIndex, array $tokens)
     {
         $this->filePath = $filePath;
         $this->tokenIndex = $tokenIndex;
         $this->tokens = $tokens;
+        $this->type = $this->detectType();
+    }
+
+    private function detectType()
+    {
+        if ($this->haveVariable()) {
+            return 'variable';
+        } elseif ($this->haveMagicConstant() && $this->getPathStringToken()) {
+            return 'absolute';
+        } elseif (Path::isAbsolute($this->getPathStringToken())) {
+            return 'absolute';
+        } elseif (Path::isRelative($this->getPathStringToken())) {
+            return 'relative';
+        } else {
+            return 'unexpected';
+        }
+    }
+
+    private function haveVariable()
+    {
+        return !is_null($this->firstToken(array(T_VARIABLE)));
     }
 
     public function string()
@@ -24,6 +48,11 @@ class RequireStatement
         }
 
         return $str;
+    }
+
+    public function type()
+    {
+        return $this->type;
     }
 
     public function getIndex()
@@ -39,7 +68,9 @@ class RequireStatement
     public function getRequiredFilePath()
     {
         // Return a file path close to the absolute path as much as possible
-        if ($this->haveMagicConstant()) {
+        if ($this->type == 'variable') {
+            return null;
+        } elseif ($this->haveMagicConstant()) {
             return realpath($this->dir() . $this->getPathStringToken());
         } elseif ($token = $this->firstToken(array(T_CONSTANT_ENCAPSED_STRING))) {
             return $this->getPathStringToken();
@@ -76,7 +107,12 @@ class RequireStatement
     private function haveDirname()
     {
         $dirnameToken = $this->firstToken(array(T_STRING));
-        return ($dirnameToken && $dirnameToken[1]== 'dirname') ? true : false;
+        $fileToken = $this->firstToken(array(T_FILE));
+        return (
+            $dirnameToken &&
+            $dirnameToken[1] == 'dirname' &&
+            $fileToken
+        ) ? true : false;
     }
 
     private function firstToken(array $searchTokens)
@@ -87,7 +123,7 @@ class RequireStatement
             }
         }
 
-        return false;
+        return null;
     }
 
     public function getFixedStatement($requireBase, $constant = null)

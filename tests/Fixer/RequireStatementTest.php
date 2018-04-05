@@ -29,6 +29,7 @@ class RequireStatementTest extends TestCase
         ));
 
         $this->assertEquals('common/Model.php', $statement->getRequiredFilePath());
+        $this->assertEquals('relative', $statement->type());
     }
 
     public function testGetRequiredFilePath_UseDir()
@@ -46,6 +47,7 @@ class RequireStatementTest extends TestCase
         ));
 
         $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/common/Model.php'), $statement->getRequiredFilePath());
+        $this->assertEquals('absolute', $statement->type());
     }
 
     public function testGetRequiredFilePath_UseDirname()
@@ -66,6 +68,24 @@ class RequireStatementTest extends TestCase
         ));
 
         $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/common/Model.php'), $statement->getRequiredFilePath());
+        $this->assertEquals('absolute', $statement->type());
+    }
+
+    public function testGetRequiredFilePath_UseVariable()
+    {
+        $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', 10, array(
+            array(T_REQUIRE_ONCE, 'require_once', 2),
+            array(375, ' ', 2),
+            array(309, '$hoge', 2),
+            array(375, ' ', 2),
+            '.',
+            array(375, ' ', 2),
+            array(T_CONSTANT_ENCAPSED_STRING, '"Model.php"', 2),
+            ';'
+        ));
+
+        $this->assertNull($statement->getRequiredFilePath());
+        $this->assertEquals('variable', $statement->type());
     }
 
     public function testGetIndex()

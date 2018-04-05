@@ -26,6 +26,27 @@ class Fixer
         return $this->files;
     }
 
+    public function fix($requireBase, $constant = null)
+    {
+        foreach ($this->files as $file) {
+            $phpFile = new File($file);
+            $statements = $phpFile->getRequireStatements();
+            if (empty($statements)) {
+                continue;
+            }
+
+            foreach ($statements as $statement) {
+                if ($statement->type() == 'relative') {
+                    $this->guessRequiredFile($statement);
+                }
+            }
+
+            $content = $phpFile->fixedRequireStatements($requireBase, $constant);
+            $splFile = new \SplFileObject($file, 'w');
+            $splFile->fwrite($content);
+        }
+    }
+
     public function report($requireBase, $constant = null)
     {
         foreach ($this->files as $file) {

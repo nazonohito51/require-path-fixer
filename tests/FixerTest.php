@@ -15,9 +15,9 @@ class FixerTest extends TestCase
         $this->assertContains(realpath(__DIR__ . '/fixtures/before/conf/const.php'), $fixer->getFiles());
     }
 
-    public function testReport()
-    {
-        $fixer = new Fixer(__DIR__ . '/fixtures/before');
-        $fixer->report(realpath(__DIR__ . '/../'), 'APP_ROOT');
-    }
+//    public function testReport()
+//    {
+//        $fixer = new Fixer(__DIR__ . '/fixtures/before');
+//        $fixer->report(realpath(__DIR__ . '/../'), 'APP_ROOT');
+//    }
 }

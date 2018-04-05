@@ -27,6 +27,8 @@ class RequireStatement
     {
         if ($this->haveVariable() || $this->haveConstant()) {
             return 'variable';
+        } elseif (is_null($this->getPathStringToken())) {
+            return 'unexpected';
         } elseif ($this->haveMagicConstant() && $this->getPathStringToken()) {
             return 'absolute';
         } elseif (Path::isAbsolute($this->getPathStringToken())) {

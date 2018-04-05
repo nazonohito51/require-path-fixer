@@ -128,13 +128,15 @@ class RequireStatement
 
     public function getFixedStatement($requireBase, $constant = null)
     {
-        $requiredFilePath = $this->getRequiredFilePath();
-        if (Path::isAbsolute($requiredFilePath)) {
-            $relativePath = Path::makeRelative($requiredFilePath, $requireBase);
+        if ($this->type() == 'absolute') {
+            $requiredFilePath = $this->getRequiredFilePath();
+            if (Path::isAbsolute($requiredFilePath)) {
+                $relativePath = Path::makeRelative($requiredFilePath, $requireBase);
 
-            $requireToken = $this->getRequireToken();
-            $base = $constant ? $constant : "'$requireBase'";
-            return "{$requireToken} {$base} . '/{$relativePath}';";
+                $requireToken = $this->getRequireToken();
+                $base = $constant ? $constant : "'$requireBase'";
+                return "{$requireToken} {$base} . '/{$relativePath}';";
+            }
         }
 
         return null;

@@ -3,6 +3,7 @@ namespace RequirePathFixer;
 
 use LucidFrame\Console\ConsoleTable;
 use RequirePathFixer\Fixer\File;
+use RequirePathFixer\Fixer\RequireStatement;
 use Symfony\Component\Finder\Finder;
 
 class Fixer
@@ -39,6 +40,10 @@ class Fixer
             $table->addHeader('after');
             $table->addHeader('type');
             foreach ($statements as $statement) {
+                if ($statement->type() == 'relative') {
+                    $this->guessRequiredFile($statement);
+                }
+
                 $table->addRow();
                 $table->addColumn($statement->string());
                 $table->addColumn($statement->getFixedStatement($requireBase, $constant));
@@ -48,6 +53,21 @@ class Fixer
             echo $file . "\n";
             $table->display();
             echo "\n\n";
+        }
+    }
+
+    private function guessRequiredFile(RequireStatement $statement)
+    {
+        $pattern = '/' . preg_quote($statement->getRequiredFilePath(), '/') . '$/';
+        $matches = array();
+        foreach ($this->files as $file) {
+            if (preg_match($pattern, $file)) {
+                $matches[] = $file;
+            }
+        }
+
+        if (count($matches) === 1) {
+            $statement->guess($matches[0]);
         }
     }
 }

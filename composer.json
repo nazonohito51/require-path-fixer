@@ -23,8 +23,5 @@
   "require-dev": {
     "phpunit/phpunit": "*",
     "mockery/mockery": "*"
-  },
-  "bin": [
-    "bin/require-path-fixer"
-  ]
+  }
 }

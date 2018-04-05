@@ -167,4 +167,23 @@ class RequireStatementTest extends TestCase
 
         $this->assertNull($statement->getFixedStatement(realpath(__DIR__ . '/../../'), 'APP_ROOT'));
     }
+
+    public function testGuess()
+    {
+        $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', 10, array(
+            array(T_REQUIRE_ONCE, 'require_once', 4),
+            '(',
+            array(T_CONSTANT_ENCAPSED_STRING, '"common/Model.php"', 4),
+            ')',
+            ';'
+        ));
+
+        $statement->guess(realpath(__DIR__ . '/../fixtures/before/common/Model.php'));
+
+        $this->assertEquals(
+            "require_once APP_ROOT . '/tests/fixtures/before/common/Model.php';",
+            $statement->getFixedStatement(realpath(__DIR__ . '/../../'), 'APP_ROOT')
+        );
+        $this->assertEquals('guess', $statement->type());
+    }
 }

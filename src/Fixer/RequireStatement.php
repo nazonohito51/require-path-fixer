@@ -153,7 +153,7 @@ class RequireStatement
 
     public function getFixedStatement($requireBase, $constant = null)
     {
-        if ($this->type() == 'absolute') {
+        if ($this->type() == 'absolute' || $this->type() == 'guess') {
             $requiredFilePath = $this->getRequiredFilePath();
             if (Path::isAbsolute($requiredFilePath)) {
                 $relativePath = Path::makeRelative($requiredFilePath, $requireBase);
@@ -170,5 +170,11 @@ class RequireStatement
     private function getRequireToken()
     {
         return $this->tokens[0][1];
+    }
+
+    public function guess($requiredFilePath)
+    {
+        $this->type = 'guess';
+        $this->requiredFilePath = $requiredFilePath;
     }
 }

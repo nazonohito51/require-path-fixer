@@ -25,7 +25,7 @@ class RequireStatement
 
     private function detectType()
     {
-        if ($this->haveVariable()) {
+        if ($this->haveVariable() || $this->haveConstant()) {
             return 'variable';
         } elseif ($this->haveMagicConstant() && $this->getPathStringToken()) {
             return 'absolute';
@@ -119,6 +119,19 @@ class RequireStatement
         return !is_null($this->firstToken(array(T_VARIABLE)));
     }
 
+    private function haveConstant()
+    {
+        $stringTokens = $this->allToken(array(T_STRING));
+
+        $haveConstant = false;
+        foreach ($stringTokens as $stringToken) {
+            if ($stringToken[1] != 'dirname') {
+                $haveConstant = true;
+            }
+        }
+        return $haveConstant;
+    }
+
     private function haveMagicConstant()
     {
         return $this->haveDirname() || $this->haveDir();
@@ -149,6 +162,18 @@ class RequireStatement
         }
 
         return null;
+    }
+
+    private function allToken(array $searchTokens)
+    {
+        $tokens = array();
+        foreach ($this->tokens as $token) {
+            if (is_array($token) && in_array($token[0], $searchTokens)) {
+                $tokens[] = $token;
+            }
+        }
+
+        return $tokens;
     }
 
     public function getFixedStatement($requireBase, $constant = null)

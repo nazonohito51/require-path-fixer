@@ -88,6 +88,23 @@ class RequireStatementTest extends TestCase
         $this->assertEquals('variable', $statement->type());
     }
 
+    public function testGetRequiredFilePath_UseConstant()
+    {
+        $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', 10, array(
+            array(T_REQUIRE_ONCE, 'require_once', 2),
+            array(375, ' ', 2),
+            array(309, 'SMARTY_DIR', 2),
+            array(375, ' ', 2),
+            '.',
+            array(375, ' ', 2),
+            array(T_CONSTANT_ENCAPSED_STRING, '"Model.php"', 2),
+            ';'
+        ));
+
+        $this->assertNull($statement->getRequiredFilePath());
+        $this->assertEquals('variable', $statement->type());
+    }
+
     public function testGetIndex()
     {
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', 10, array(

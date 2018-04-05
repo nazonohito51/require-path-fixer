@@ -7,6 +7,7 @@ use Webmozart\PathUtil\Path;
 class RequireStatement
 {
     private $filePath;
+    private $requiredFilePath;
     private $tokenIndex;
     private $tokens;
     private $type;
@@ -19,6 +20,7 @@ class RequireStatement
         $this->tokenIndex = $tokenIndex;
         $this->tokens = $tokens;
         $this->type = $this->detectType();
+        $this->requiredFilePath = $this->detectRequiredFilePath();
     }
 
     private function detectType()
@@ -36,9 +38,35 @@ class RequireStatement
         }
     }
 
-    private function haveVariable()
+    private function detectRequiredFilePath()
     {
-        return !is_null($this->firstToken(array(T_VARIABLE)));
+        // Return a file path close to the absolute path as much as possible
+        if ($this->type == 'variable' || $this->type == 'guess' || $this->type == 'unexpected') {
+            return null;
+        } else {
+            $code = 'return ';
+            foreach ($this->tokens as $token) {
+                if (isset($token[0]) && in_array($token[0], array(T_REQUIRE, T_REQUIRE_ONCE, T_INCLUDE, T_INCLUDE_ONCE))) {
+                    continue;
+                } elseif (isset($token[0]) && $token[0] == T_FILE) {
+                    $code .= "'" . $this->filePath . "'";
+                } elseif (isset($token[0]) && $token[0] == T_DIR) {
+                    $code .= "'" . $this->dir() . "'";
+                } elseif (is_array($token)) {
+                    $code .= $token[1];
+                } else {
+                    $code .= $token;
+                }
+            }
+
+            $path = eval($code);
+            if (empty($path)) {
+                $this->type = 'unexpected';
+                throw new EvalException($code, $path);
+            }
+
+            return Path::canonicalize($path);
+        }
     }
 
     public function string()
@@ -68,32 +96,7 @@ class RequireStatement
 
     public function getRequiredFilePath()
     {
-        // Return a file path close to the absolute path as much as possible
-        if ($this->type == 'variable') {
-            return null;
-        } else {
-            $code = 'return ';
-            foreach ($this->tokens as $token) {
-                if (isset($token[0]) && in_array($token[0], array(T_REQUIRE, T_REQUIRE_ONCE, T_INCLUDE, T_INCLUDE_ONCE))) {
-                    continue;
-                } elseif (isset($token[0]) && $token[0] == T_FILE) {
-                    $code .= "'" . $this->filePath . "'";
-                } elseif (isset($token[0]) && $token[0] == T_DIR) {
-                    $code .= "'" . $this->dir() . "'";
-                } elseif (is_array($token)) {
-                    $code .= $token[1];
-                } else {
-                    $code .= $token;
-                }
-            }
-
-            $path = eval($code);
-            if (empty($path)) {
-                throw new EvalException($code, $path);
-            }
-
-            return Path::canonicalize($path);
-        }
+        return $this->requiredFilePath;
     }
 
     private function dir()
@@ -109,6 +112,11 @@ class RequireStatement
         }
 
         return null;
+    }
+
+    private function haveVariable()
+    {
+        return !is_null($this->firstToken(array(T_VARIABLE)));
     }
 
     private function haveMagicConstant()

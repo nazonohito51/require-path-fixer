@@ -37,10 +37,10 @@ class RequireStatementTest extends TestCase
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', 10, array(
             array(T_REQUIRE_ONCE, 'require_once', 2),
             '(',
-            array(383, '__DIR__', 2),
-            array(375, ' ', 2),
+            array(T_DIR, '__DIR__', 2),
+            array(T_WHITESPACE, ' ', 2),
             '.',
-            array(375, ' ', 2),
+            array(T_WHITESPACE, ' ', 2),
             array(T_CONSTANT_ENCAPSED_STRING, '"/common/Model.php"', 2),
             ')',
             ';'
@@ -54,16 +54,16 @@ class RequireStatementTest extends TestCase
     {
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', 10, array(
             array(T_REQUIRE_ONCE, 'require_once', 2),
-            array(375, ' ', 2),
-            array(307, 'dirname', 2),
+            array(T_WHITESPACE, ' ', 2),
+            array(T_STRING, 'dirname', 2),
             '(',
-            array(369, '__FILE__', 2),
+            array(T_FILE, '__FILE__', 2),
             ')',
-            array(375, ' ', 2),
+            array(T_WHITESPACE, ' ', 2),
             '.',
-            array(375, ' ', 2),
+            array(T_WHITESPACE, ' ', 2),
             array(T_CONSTANT_ENCAPSED_STRING, '"/common/Model.php"', 2),
-            array(375, ' ', 2),
+            array(T_WHITESPACE, ' ', 2),
             ';'
         ));
 
@@ -75,11 +75,11 @@ class RequireStatementTest extends TestCase
     {
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', 10, array(
             array(T_REQUIRE_ONCE, 'require_once', 2),
-            array(375, ' ', 2),
-            array(309, '$hoge', 2),
-            array(375, ' ', 2),
+            array(T_WHITESPACE, ' ', 2),
+            array(T_VARIABLE, '$hoge', 2),
+            array(T_WHITESPACE, ' ', 2),
             '.',
-            array(375, ' ', 2),
+            array(T_WHITESPACE, ' ', 2),
             array(T_CONSTANT_ENCAPSED_STRING, '"Model.php"', 2),
             ';'
         ));
@@ -92,11 +92,11 @@ class RequireStatementTest extends TestCase
     {
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', 10, array(
             array(T_REQUIRE_ONCE, 'require_once', 2),
-            array(375, ' ', 2),
-            array(309, 'SMARTY_DIR', 2),
-            array(375, ' ', 2),
+            array(T_WHITESPACE, ' ', 2),
+            array(T_VARIABLE, 'SMARTY_DIR', 2),
+            array(T_WHITESPACE, ' ', 2),
             '.',
-            array(375, ' ', 2),
+            array(T_WHITESPACE, ' ', 2),
             array(T_CONSTANT_ENCAPSED_STRING, '"Model.php"', 2),
             ';'
         ));
@@ -109,7 +109,7 @@ class RequireStatementTest extends TestCase
     {
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', 10, array(
             array(T_REQUIRE_ONCE, 'require_once', 2),
-            array(375, ' ', 2),
+            array(T_WHITESPACE, ' ', 2),
             array(T_CLASS, 'class', 2),
             ';'
         ));
@@ -149,10 +149,10 @@ class RequireStatementTest extends TestCase
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', 10, array(
             array(T_REQUIRE_ONCE, 'require_once', 2),
             '(',
-            array(383, '__DIR__', 2),
-            array(375, ' ', 2),
+            array(T_DIR, '__DIR__', 2),
+            array(T_WHITESPACE, ' ', 2),
             '.',
-            array(375, ' ', 2),
+            array(T_WHITESPACE, ' ', 2),
             array(T_CONSTANT_ENCAPSED_STRING, '"/common/Model.php"', 2),
             ')',
             ';'
@@ -169,10 +169,10 @@ class RequireStatementTest extends TestCase
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', 10, array(
             array(T_REQUIRE_ONCE, 'require_once', 2),
             '(',
-            array(383, '__DIR__', 2),
-            array(375, ' ', 2),
+            array(T_DIR, '__DIR__', 2),
+            array(T_WHITESPACE, ' ', 2),
             '.',
-            array(375, ' ', 2),
+            array(T_WHITESPACE, ' ', 2),
             array(T_CONSTANT_ENCAPSED_STRING, '"/common/Model.php"', 2),
             ')',
             ';'

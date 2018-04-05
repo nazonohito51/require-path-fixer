@@ -37,12 +37,12 @@ class Fixer
             $table = new ConsoleTable();
             $table->addHeader('before');
             $table->addHeader('after');
-            $table->addHeader('description');
+            $table->addHeader('type');
             foreach ($statements as $statement) {
                 $table->addRow();
                 $table->addColumn($statement->string());
                 $table->addColumn($statement->getFixedStatement($requireBase, $constant));
-                $table->addColumn('description');
+                $table->addColumn($statement->type());
             }
 
             echo $file . "\n";

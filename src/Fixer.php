@@ -21,7 +21,7 @@ class Fixer
 
         $this->path = $dir;
         $finder = new Finder();
-        $iterator = $finder->in($dir)->name('*.php')->files();
+        $iterator = $finder->in($dir)->name('*.php')->name('*.inc')->files();
         foreach ($iterator as $fileInfo) {
             $this->files[] = $fileInfo->getPathname();
         }

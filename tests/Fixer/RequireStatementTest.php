@@ -18,7 +18,7 @@ class RequireStatementTest extends TestCase
         $this->assertEquals('require_once("common/Model.php");', $statement->string());
     }
 
-    public function testGetRequiredFilePath()
+    public function testGetRequireFile()
     {
         $statement = new RequireStatement(__DIR__ . '/../before/fixtures/View.php', array(
             array(T_REQUIRE_ONCE, 'require_once', 4),
@@ -32,7 +32,7 @@ class RequireStatementTest extends TestCase
         $this->assertEquals('relative', $statement->type());
     }
 
-    public function testGetRequiredFilePath_UseDir()
+    public function testGetRequireFile_UseDir()
     {
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', array(
             array(T_REQUIRE_ONCE, 'require_once', 2),
@@ -50,7 +50,7 @@ class RequireStatementTest extends TestCase
         $this->assertEquals('absolute', $statement->type());
     }
 
-    public function testGetRequiredFilePath_UseDirname()
+    public function testGetRequireFile_UseDirname()
     {
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', array(
             array(T_REQUIRE_ONCE, 'require_once', 2),
@@ -71,7 +71,7 @@ class RequireStatementTest extends TestCase
         $this->assertEquals('absolute', $statement->type());
     }
 
-    public function testGetRequiredFilePath_UseVariable()
+    public function testGetRequireFile_UseVariable()
     {
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', array(
             array(T_REQUIRE_ONCE, 'require_once', 2),
@@ -88,7 +88,7 @@ class RequireStatementTest extends TestCase
         $this->assertEquals('variable', $statement->type());
     }
 
-    public function testGetRequiredFilePath_UseConstant()
+    public function testGetRequireFile_UseConstant()
     {
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', array(
             array(T_REQUIRE_ONCE, 'require_once', 2),
@@ -105,7 +105,7 @@ class RequireStatementTest extends TestCase
         $this->assertEquals('variable', $statement->type());
     }
 
-    public function testGetRequiredFilePath_NoPath()
+    public function testGetRequireFile_NoPath()
     {
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', array(
             array(T_REQUIRE_ONCE, 'require_once', 2),
@@ -118,7 +118,7 @@ class RequireStatementTest extends TestCase
         $this->assertEquals('unexpected', $statement->type());
     }
 
-    public function testGetFixedStatement()
+    public function testGetFixedString()
     {
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', array(
             array(T_REQUIRE_ONCE, 'require_once', 2),
@@ -138,7 +138,7 @@ class RequireStatementTest extends TestCase
         );
     }
 
-    public function testGetFixedStatement_NoConstant()
+    public function testGetFixedString_NoConstant()
     {
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', array(
             array(T_REQUIRE_ONCE, 'require_once', 2),
@@ -159,7 +159,7 @@ class RequireStatementTest extends TestCase
         );
     }
 
-    public function testGetFixedStatement_NotAbsolutePath()
+    public function testGetFixedString_NotAbsolutePath()
     {
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', array(
             array(T_REQUIRE_ONCE, 'require_once', 4),

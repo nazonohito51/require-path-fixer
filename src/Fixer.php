@@ -2,7 +2,7 @@
 namespace RequirePathFixer;
 
 use LucidFrame\Console\ConsoleTable;
-use RequirePathFixer\Fixer\File;
+use RequirePathFixer\Fixer\PhpFile;
 use RequirePathFixer\Fixer\RequireStatement;
 use Symfony\Component\Finder\Finder;
 
@@ -39,7 +39,7 @@ class Fixer
                 continue;
             }
 
-            $phpFile = new File($file);
+            $phpFile = new PhpFile($file);
             $statements = $phpFile->getRequireStatements();
             if (empty($statements)) {
                 continue;
@@ -72,7 +72,7 @@ class Fixer
                 continue;
             }
 
-            $phpFile = new File($file);
+            $phpFile = new PhpFile($file);
             $statements = $phpFile->getRequireStatements();
             if (empty($statements)) {
                 continue;

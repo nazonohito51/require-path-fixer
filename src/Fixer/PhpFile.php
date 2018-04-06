@@ -1,7 +1,7 @@
 <?php
 namespace RequirePathFixer\Fixer;
 
-class File
+class PhpFile
 {
     private $path;
     private $tokens;

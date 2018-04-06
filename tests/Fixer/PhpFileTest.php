@@ -3,11 +3,11 @@ namespace RequirePathFixer\Fixer;
 
 use PHPUnit\Framework\TestCase;
 
-class FileTest extends TestCase
+class PhpFileTest extends TestCase
 {
     public function testGetRequireStatements()
     {
-        $file = new File(__DIR__ . '/../fixtures/before/View.php');
+        $file = new PhpFile(__DIR__ . '/../fixtures/before/View.php');
 
         $statements = $file->getRequireStatements();
 
@@ -20,14 +20,14 @@ class FileTest extends TestCase
 
     public function testGetContents_BeforeFix()
     {
-        $file = new File(__DIR__ . '/../fixtures/before/View.php');
+        $file = new PhpFile(__DIR__ . '/../fixtures/before/View.php');
 
         $this->assertEquals(file_get_contents(__DIR__ . '/../fixtures/before/View.php'), $file->getContents());
     }
 
     public function testFixedRequireStatements()
     {
-        $file = new File(__DIR__ . '/../fixtures/before/View.php');
+        $file = new PhpFile(__DIR__ . '/../fixtures/before/View.php');
 
         $this->assertEquals(
             file_get_contents(__DIR__ . '/../fixtures/after/View.php'),

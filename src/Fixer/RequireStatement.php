@@ -2,6 +2,7 @@
 namespace RequirePathFixer\Fixer;
 
 use RequirePathFixer\Exceptions\EvalException;
+use RequirePathFixer\Exceptions\GenerateEvalCodeException;
 use Webmozart\PathUtil\Path;
 
 class RequireStatement
@@ -10,40 +11,25 @@ class RequireStatement
     private $requireFile;
     private $tokens;
     private $type;
+    private $replacements = array();
 
 //    const TYPE = array('absolute', 'relative', 'guess', 'variable', 'unexpected');
 
-    public function __construct($file, array $tokens)
+    public function __construct($file, array $tokens, array $replacement = array())
     {
         $this->file = realpath($file);
         $this->tokens = $tokens;
-        $this->type = $this->detectType();
-        $this->requireFile = $this->detectRequireFile();
+        $this->replacements = $replacement;
+
+        $this->resolveRequireFile();
     }
 
-    private function detectType()
+    private function resolveRequireFile()
     {
-        if ($this->haveVariable() || $this->haveConstant()) {
-            return 'variable';
-        } elseif (is_null($this->getPathString())) {
-            return 'unexpected';
-        } elseif ($this->haveMagicConstant() && $this->getPathString()) {
-            return 'absolute';
-        } elseif (Path::isAbsolute($this->getPathString())) {
-            return 'absolute';
-        } elseif (Path::isRelative($this->getPathString())) {
-            return 'relative';
-        } else {
-            return 'unexpected';
-        }
-    }
-
-    private function detectRequireFile()
-    {
-        // Return a file path close to the absolute path as much as possible
-        if ($this->type == 'variable' || $this->type == 'guess' || $this->type == 'unexpected') {
-            return null;
-        } else {
+        try {
+            // ex:
+            //   $this->string() == "require_once dirname(__FILE__) . $variable . '/dir/file.php'";
+            //   $code == "return dirname('/path/to/this/php/file.php') . 'replacementText' . '/dir/file.php'";
             $code = 'return ';
             foreach ($this->tokens as $token) {
                 if (isset($token[0]) && in_array($token[0], array(T_REQUIRE, T_REQUIRE_ONCE, T_INCLUDE, T_INCLUDE_ONCE))) {
@@ -52,6 +38,10 @@ class RequireStatement
                     $code .= "'" . $this->file . "'";
                 } elseif (isset($token[0]) && $token[0] == T_DIR) {
                     $code .= "'" . $this->dir() . "'";
+                } elseif (isset($token[0]) && $token[0] == T_STRING && $token[1] != 'dirname') {
+                    $code .= $this->replaceToken($token);
+                } elseif (isset($token[0]) && $token[0] == T_VARIABLE) {
+                    $code .= $this->replaceToken($token);
                 } elseif (is_array($token)) {
                     $code .= $token[1];
                 } else {
@@ -59,19 +49,38 @@ class RequireStatement
                 }
             }
 
-            $path = $this->execStringConcatenation($code);
-            if (empty($path)) {
-                $this->type = 'unexpected';
-                throw new EvalException($code, $path);
+            $this->requireFile = Path::canonicalize($this->execStringConcatenation($code));
+            if (Path::isAbsolute($this->requireFile)) {
+                $this->type = 'absolute';
+            } else {
+                $this->type = 'relative';
             }
-
-            return Path::canonicalize($path);
+        } catch (GenerateEvalCodeException $e) {
+            $this->requireFile = null;
+            $this->type = 'variable';
+        } catch (EvalException $e) {
+            $this->requireFile = null;
+            $this->type = 'unexpected';
         }
+    }
+
+    private function replaceToken(array $token)
+    {
+        if (isset($this->replacements[$token[1]])) {
+            return "'" . $this->replacements[$token[1]] . "'";
+        }
+
+        throw new GenerateEvalCodeException($this->file, $token);
     }
 
     private function execStringConcatenation($code)
     {
-        return eval($code);
+        $path = eval($code);
+        if (empty($path)) {
+            throw new EvalException($code, $path);
+        }
+
+        return $path;
     }
 
     public function string()

@@ -93,7 +93,7 @@ class RequireStatementTest extends TestCase
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', array(
             array(T_REQUIRE_ONCE, 'require_once', 2),
             array(T_WHITESPACE, ' ', 2),
-            array(T_VARIABLE, 'SMARTY_DIR', 2),
+            array(T_VARIABLE, 'COMMON_DIR', 2),
             array(T_WHITESPACE, ' ', 2),
             '.',
             array(T_WHITESPACE, ' ', 2),
@@ -103,6 +103,25 @@ class RequireStatementTest extends TestCase
 
         $this->assertNull($statement->getRequireFile());
         $this->assertEquals('variable', $statement->type());
+    }
+
+    public function testGetRequireFile_AddReplacement()
+    {
+        $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', array(
+            array(T_REQUIRE_ONCE, 'require_once', 2),
+            array(T_WHITESPACE, ' ', 2),
+            array(T_VARIABLE, 'COMMON_DIR', 2),
+            array(T_WHITESPACE, ' ', 2),
+            '.',
+            array(T_WHITESPACE, ' ', 2),
+            array(T_CONSTANT_ENCAPSED_STRING, '"Model.php"', 2),
+            ';'
+        ), array(
+            'COMMON_DIR' => realpath(__DIR__ . '/../fixtures/before/common/') . '/'
+        ));
+
+        $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/common/Model.php'), $statement->getRequireFile());
+        $this->assertEquals('absolute', $statement->type());
     }
 
     public function testGetRequireFile_NoPath()

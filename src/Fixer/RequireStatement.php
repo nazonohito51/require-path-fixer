@@ -8,16 +8,14 @@ class RequireStatement
 {
     private $filePath;
     private $requiredFilePath;
-    private $tokenIndex;
     private $tokens;
     private $type;
 
 //    const TYPE = array('absolute', 'relative', 'guess', 'variable', 'unexpected');
 
-    public function __construct($filePath, $tokenIndex, array $tokens)
+    public function __construct($filePath, array $tokens)
     {
         $this->filePath = $filePath;
-        $this->tokenIndex = $tokenIndex;
         $this->tokens = $tokens;
         $this->type = $this->detectType();
         $this->requiredFilePath = $this->detectRequiredFilePath();
@@ -84,16 +82,6 @@ class RequireStatement
     public function type()
     {
         return $this->type;
-    }
-
-    public function getIndex()
-    {
-        return $this->tokenIndex;
-    }
-
-    public function getTokenCount()
-    {
-        return count($this->tokens);
     }
 
     public function getRequiredFilePath()

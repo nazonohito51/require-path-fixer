@@ -12,13 +12,9 @@ class FileTest extends TestCase
         $statements = $file->getRequireStatements();
 
         $this->assertEquals(4, count($statements));
-        $this->assertEquals(3, $statements[0]->getIndex());
         $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/conf/config.php'), $statements[0]->getRequiredFilePath());
-        $this->assertEquals(15, $statements[1]->getIndex());
         $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/conf/const.php'), $statements[1]->getRequiredFilePath());
-        $this->assertEquals(24, $statements[2]->getIndex());
         $this->assertEquals('common/Model.php', $statements[2]->getRequiredFilePath());
-        $this->assertEquals(29, $statements[3]->getIndex());
         $this->assertNull($statements[3]->getRequiredFilePath());
     }
 

@@ -32,7 +32,7 @@ class File
                 }
 
                 if ($start && $end) {
-                    $this->requireStatements[] = new RequireStatement($this->path, $start, array_slice($this->tokens, $start, $end - $start));
+                    $this->requireStatements[] = new RequireStatement($this->path, array_slice($this->tokens, $start, $end - $start));
                 }
             }
         }

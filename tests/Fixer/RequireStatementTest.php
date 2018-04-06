@@ -129,7 +129,6 @@ class RequireStatementTest extends TestCase
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', array(
             array(T_REQUIRE_ONCE, 'require_once', 2),
             array(T_WHITESPACE, ' ', 2),
-            array(T_CLASS, 'class', 2),
             ';'
         ));
 

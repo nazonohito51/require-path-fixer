@@ -132,7 +132,7 @@ class Fixer
 
     public function addVariable($variable, $value)
     {
-        $this->replacements['$' . $variable] = $value;
+        $this->replacements[$variable] = $value;
     }
 
     public function addConstant($constant, $value)

@@ -7,9 +7,17 @@ This library searches all require statements and modifies them to be homogeneous
 ## Usage
 
 ```
-$fixer = new \RequirePathFixer\Fixer(__DIR__ . '/app');
-$fixer->addBlackList(__DIR__ . '/vendor');
-$fixer->addBlackList(__DIR__ . '/tests');
+$fixer = new \RequirePathFixer\Fixer($inspectDirPath);   // It is recommended that $inspectDirPath be a repository root.
+
+// If you have files or directories you don't want to modify, pass the path to this method.
+$fixer->addBlackList($inspectDirPath . '/vendor');
+$fixer->addBlackList($inspectDirPath . '/tests');
+
+// The following statement will be not replaced, because it is unknown what path COMMON_DIR is.
+// require_once COMMON_DIR . '/path/to/file.php';
+// If there is a constant or variable to be replaced, it is passed to the following method.
+$fixer->addConstant('COMMON_DIR', '/path/to/common/dir/');   // COMMON_DIR will be replaced to '/path/to/common/dir/'
+$fixer->addVariable('$smartyDir', '/path/to/smarty/dir/');   // $smartyDir will be replaced to '/path/to/smarty/dir/'
 
 // Only reporting.
 $fixer->report(__DIR__, 'APP_ROOT');

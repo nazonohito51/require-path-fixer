@@ -11,6 +11,7 @@ class Fixer
     private $path;
     private $files = array();
     private $blackList = array();
+    private $replacements = array();
 
     public function __construct($dir)
     {
@@ -39,7 +40,7 @@ class Fixer
                 continue;
             }
 
-            $phpFile = new PhpFile($file);
+            $phpFile = new PhpFile($file, $this->replacements);
             $statements = $phpFile->getRequireStatements();
             if (empty($statements)) {
                 continue;
@@ -72,7 +73,7 @@ class Fixer
                 continue;
             }
 
-            $phpFile = new PhpFile($file);
+            $phpFile = new PhpFile($file, $this->replacements);
             $statements = $phpFile->getRequireStatements();
             if (empty($statements)) {
                 continue;
@@ -127,5 +128,15 @@ class Fixer
         foreach ($iterator as $fileInfo) {
             $this->blackList[] = $fileInfo->getPathname();
         }
+    }
+
+    public function addVariable($variable, $value)
+    {
+        $this->replacements['$' . $variable] = $value;
+    }
+
+    public function addConstant($constant, $value)
+    {
+        $this->replacements[$constant] = $value;
     }
 }

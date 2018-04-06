@@ -12,10 +12,10 @@ class FileTest extends TestCase
         $statements = $file->getRequireStatements();
 
         $this->assertEquals(4, count($statements));
-        $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/conf/config.php'), $statements[0]->getRequiredFilePath());
-        $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/conf/const.php'), $statements[1]->getRequiredFilePath());
-        $this->assertEquals('common/Model.php', $statements[2]->getRequiredFilePath());
-        $this->assertNull($statements[3]->getRequiredFilePath());
+        $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/conf/config.php'), $statements[0]->getRequireFile());
+        $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/conf/const.php'), $statements[1]->getRequireFile());
+        $this->assertEquals('common/Model.php', $statements[2]->getRequireFile());
+        $this->assertNull($statements[3]->getRequireFile());
     }
 
     public function testGetContents_BeforeFix()

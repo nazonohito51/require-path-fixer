@@ -6,39 +6,39 @@ use Webmozart\PathUtil\Path;
 
 class RequireStatement
 {
-    private $filePath;
-    private $requiredFilePath;
+    private $file;
+    private $requireFile;
     private $tokens;
     private $type;
 
 //    const TYPE = array('absolute', 'relative', 'guess', 'variable', 'unexpected');
 
-    public function __construct($filePath, array $tokens)
+    public function __construct($file, array $tokens)
     {
-        $this->filePath = $filePath;
+        $this->file = realpath($file);
         $this->tokens = $tokens;
         $this->type = $this->detectType();
-        $this->requiredFilePath = $this->detectRequiredFilePath();
+        $this->requireFile = $this->detectRequireFile();
     }
 
     private function detectType()
     {
         if ($this->haveVariable() || $this->haveConstant()) {
             return 'variable';
-        } elseif (is_null($this->getPathStringToken())) {
+        } elseif (is_null($this->getPathString())) {
             return 'unexpected';
-        } elseif ($this->haveMagicConstant() && $this->getPathStringToken()) {
+        } elseif ($this->haveMagicConstant() && $this->getPathString()) {
             return 'absolute';
-        } elseif (Path::isAbsolute($this->getPathStringToken())) {
+        } elseif (Path::isAbsolute($this->getPathString())) {
             return 'absolute';
-        } elseif (Path::isRelative($this->getPathStringToken())) {
+        } elseif (Path::isRelative($this->getPathString())) {
             return 'relative';
         } else {
             return 'unexpected';
         }
     }
 
-    private function detectRequiredFilePath()
+    private function detectRequireFile()
     {
         // Return a file path close to the absolute path as much as possible
         if ($this->type == 'variable' || $this->type == 'guess' || $this->type == 'unexpected') {
@@ -49,7 +49,7 @@ class RequireStatement
                 if (isset($token[0]) && in_array($token[0], array(T_REQUIRE, T_REQUIRE_ONCE, T_INCLUDE, T_INCLUDE_ONCE))) {
                     continue;
                 } elseif (isset($token[0]) && $token[0] == T_FILE) {
-                    $code .= "'" . $this->filePath . "'";
+                    $code .= "'" . $this->file . "'";
                 } elseif (isset($token[0]) && $token[0] == T_DIR) {
                     $code .= "'" . $this->dir() . "'";
                 } elseif (is_array($token)) {
@@ -59,7 +59,7 @@ class RequireStatement
                 }
             }
 
-            $path = eval($code);
+            $path = $this->execStringConcatenation($code);
             if (empty($path)) {
                 $this->type = 'unexpected';
                 throw new EvalException($code, $path);
@@ -67,6 +67,11 @@ class RequireStatement
 
             return Path::canonicalize($path);
         }
+    }
+
+    private function execStringConcatenation($code)
+    {
+        return eval($code);
     }
 
     public function string()
@@ -84,24 +89,31 @@ class RequireStatement
         return $this->type;
     }
 
-    public function getRequiredFilePath()
+    public function getRequireFile()
     {
-        return $this->requiredFilePath;
+        return $this->requireFile;
     }
 
     private function dir()
     {
-        $info = pathinfo($this->filePath);
+        $info = pathinfo($this->file);
         return $info['dirname'];
     }
 
-    private function getPathStringToken()
+    private function getPathString()
     {
         if ($token = $this->firstToken(array(T_CONSTANT_ENCAPSED_STRING))) {
             return preg_replace('/["\']/', '', $token[1]);
         }
 
         return null;
+    }
+
+    private function getRequireString()
+    {
+        $token = $this->firstToken(array(T_REQUIRE, T_REQUIRE_ONCE, T_INCLUDE, T_INCLUDE_ONCE));
+
+        return $token[1];
     }
 
     private function haveVariable()
@@ -113,13 +125,12 @@ class RequireStatement
     {
         $stringTokens = $this->allToken(array(T_STRING));
 
-        $haveConstant = false;
         foreach ($stringTokens as $stringToken) {
             if ($stringToken[1] != 'dirname') {
-                $haveConstant = true;
+                return true;
             }
         }
-        return $haveConstant;
+        return false;
     }
 
     private function haveMagicConstant()
@@ -143,22 +154,20 @@ class RequireStatement
         ) ? true : false;
     }
 
-    private function firstToken(array $searchTokens)
+    private function firstToken(array $tokenType)
     {
-        foreach ($this->tokens as $token) {
-            if (is_array($token) && in_array($token[0], $searchTokens)) {
-                return $token;
-            }
+        if ($token = $this->allToken($tokenType)) {
+            return $token[0];
         }
 
         return null;
     }
 
-    private function allToken(array $searchTokens)
+    private function allToken(array $tokenType)
     {
         $tokens = array();
         foreach ($this->tokens as $token) {
-            if (is_array($token) && in_array($token[0], $searchTokens)) {
+            if (is_array($token) && in_array($token[0], $tokenType)) {
                 $tokens[] = $token;
             }
         }
@@ -166,30 +175,25 @@ class RequireStatement
         return $tokens;
     }
 
-    public function getFixedStatement($requireBase, $constant = null)
+    public function getFixedString($requireBase, $constant = null)
     {
         if ($this->type() == 'absolute' || $this->type() == 'guess') {
-            $requiredFilePath = $this->getRequiredFilePath();
-            if (Path::isAbsolute($requiredFilePath)) {
-                $relativePath = Path::makeRelative($requiredFilePath, $requireBase);
+            $requireFile = $this->getRequireFile();
+            if (Path::isAbsolute($requireFile)) {
+                $relativePath = Path::makeRelative($requireFile, $requireBase);
 
-                $requireToken = $this->getRequireToken();
+                $requireString = $this->getRequireString();
                 $base = $constant ? $constant : "'$requireBase'";
-                return "{$requireToken} {$base} . '/{$relativePath}';";
+                return "{$requireString} {$base} . '/{$relativePath}';";
             }
         }
 
         return null;
     }
 
-    private function getRequireToken()
-    {
-        return $this->tokens[0][1];
-    }
-
     public function guess($requiredFilePath)
     {
         $this->type = 'guess';
-        $this->requiredFilePath = $requiredFilePath;
+        $this->requireFile = $requiredFilePath;
     }
 }

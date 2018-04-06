@@ -89,7 +89,7 @@ class Fixer
 
                 $table->addRow();
                 $table->addColumn($statement->string());
-                $table->addColumn($statement->getFixedStatement($requireBase, $constant));
+                $table->addColumn($statement->getFixedString($requireBase, $constant));
                 $table->addColumn($statement->type());
 
                 $result[$statement->type()]++;
@@ -105,7 +105,7 @@ class Fixer
 
     private function guessRequiredFile(RequireStatement $statement)
     {
-        $path = $statement->getRequiredFilePath();
+        $path = $statement->getRequireFile();
         $path = substr($path, 0 , 1) == DIRECTORY_SEPARATOR ? $path : DIRECTORY_SEPARATOR . $path;
         $pattern = '/' . preg_quote($path, '/') . '$/';
         $matches = array();

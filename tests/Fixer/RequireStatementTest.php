@@ -28,7 +28,7 @@ class RequireStatementTest extends TestCase
             ';'
         ));
 
-        $this->assertEquals('common/Model.php', $statement->getRequiredFilePath());
+        $this->assertEquals('common/Model.php', $statement->getRequireFile());
         $this->assertEquals('relative', $statement->type());
     }
 
@@ -46,7 +46,7 @@ class RequireStatementTest extends TestCase
             ';'
         ));
 
-        $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/common/Model.php'), $statement->getRequiredFilePath());
+        $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/common/Model.php'), $statement->getRequireFile());
         $this->assertEquals('absolute', $statement->type());
     }
 
@@ -67,7 +67,7 @@ class RequireStatementTest extends TestCase
             ';'
         ));
 
-        $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/common/Model.php'), $statement->getRequiredFilePath());
+        $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/common/Model.php'), $statement->getRequireFile());
         $this->assertEquals('absolute', $statement->type());
     }
 
@@ -84,7 +84,7 @@ class RequireStatementTest extends TestCase
             ';'
         ));
 
-        $this->assertNull($statement->getRequiredFilePath());
+        $this->assertNull($statement->getRequireFile());
         $this->assertEquals('variable', $statement->type());
     }
 
@@ -101,7 +101,7 @@ class RequireStatementTest extends TestCase
             ';'
         ));
 
-        $this->assertNull($statement->getRequiredFilePath());
+        $this->assertNull($statement->getRequireFile());
         $this->assertEquals('variable', $statement->type());
     }
 
@@ -114,7 +114,7 @@ class RequireStatementTest extends TestCase
             ';'
         ));
 
-        $this->assertNull($statement->getRequiredFilePath());
+        $this->assertNull($statement->getRequireFile());
         $this->assertEquals('unexpected', $statement->type());
     }
 
@@ -134,7 +134,7 @@ class RequireStatementTest extends TestCase
 
         $this->assertEquals(
             "require_once APP_ROOT . '/tests/fixtures/before/common/Model.php';",
-            $statement->getFixedStatement(realpath(__DIR__ . '/../../'), 'APP_ROOT')
+            $statement->getFixedString(realpath(__DIR__ . '/../../'), 'APP_ROOT')
         );
     }
 
@@ -155,7 +155,7 @@ class RequireStatementTest extends TestCase
         $path = realpath(__DIR__ . '/../../');
         $this->assertEquals(
             "require_once '{$path}' . '/tests/fixtures/before/common/Model.php';",
-            $statement->getFixedStatement(realpath(__DIR__ . '/../../'))
+            $statement->getFixedString(realpath(__DIR__ . '/../../'))
         );
     }
 
@@ -169,7 +169,7 @@ class RequireStatementTest extends TestCase
             ';'
         ));
 
-        $this->assertNull($statement->getFixedStatement(realpath(__DIR__ . '/../../'), 'APP_ROOT'));
+        $this->assertNull($statement->getFixedString(realpath(__DIR__ . '/../../'), 'APP_ROOT'));
     }
 
     public function testGuess()
@@ -186,7 +186,7 @@ class RequireStatementTest extends TestCase
 
         $this->assertEquals(
             "require_once APP_ROOT . '/tests/fixtures/before/common/Model.php';",
-            $statement->getFixedStatement(realpath(__DIR__ . '/../../'), 'APP_ROOT')
+            $statement->getFixedString(realpath(__DIR__ . '/../../'), 'APP_ROOT')
         );
         $this->assertEquals('guess', $statement->type());
     }

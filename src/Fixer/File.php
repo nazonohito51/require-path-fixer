@@ -63,7 +63,7 @@ class File
         $content = file_get_contents($this->path);
 
         foreach ($this->requireStatements as $requireStatement) {
-            if ($fixedContent = $requireStatement->getFixedStatement($requireBase, $constant)) {
+            if ($fixedContent = $requireStatement->getFixedString($requireBase, $constant)) {
                 $content = str_replace($requireStatement->string(), $fixedContent, $content);
             }
         }

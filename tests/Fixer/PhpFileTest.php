@@ -11,21 +11,38 @@ class PhpFileTest extends TestCase
 
         $statements = $file->getRequireStatements();
 
-        $this->assertEquals(4, count($statements));
+        $this->assertEquals(5, count($statements));
         $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/conf/config.php'), $statements[0]->getRequireFile());
         $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/conf/const.php'), $statements[1]->getRequireFile());
         $this->assertEquals('common/Model.php', $statements[2]->getRequireFile());
         $this->assertNull($statements[3]->getRequireFile());
+        $this->assertNull($statements[4]->getRequireFile());
     }
 
-    public function testGetContents_BeforeFix()
+    public function testGetRequireStatements_AddReplacement()
+    {
+        $file = new PhpFile(__DIR__ . '/../fixtures/before/View.php', array(
+            'COMMON_DIR' => realpath(__DIR__ . '/../fixtures/before/common/') . '/'
+        ));
+
+        $statements = $file->getRequireStatements();
+
+        $this->assertEquals(5, count($statements));
+        $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/conf/config.php'), $statements[0]->getRequireFile());
+        $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/conf/const.php'), $statements[1]->getRequireFile());
+        $this->assertEquals('common/Model.php', $statements[2]->getRequireFile());
+        $this->assertNull($statements[3]->getRequireFile());
+        $this->assertEquals(realpath(__DIR__ . '/../fixtures/before/common/Model.php'), $statements[4]->getRequireFile());
+    }
+
+    public function testGetContents()
     {
         $file = new PhpFile(__DIR__ . '/../fixtures/before/View.php');
 
         $this->assertEquals(file_get_contents(__DIR__ . '/../fixtures/before/View.php'), $file->getContents());
     }
 
-    public function testFixedRequireStatements()
+    public function testGetFixedContents()
     {
         $file = new PhpFile(__DIR__ . '/../fixtures/before/View.php');
 

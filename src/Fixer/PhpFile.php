@@ -5,16 +5,18 @@ class PhpFile
 {
     private $path;
     private $tokens;
+    private $replacement = array();
 
     /**
      * @var RequireStatement[]
      */
     private $requireStatements = array();
 
-    public function __construct($path)
+    public function __construct($path, array $replacement = array())
     {
         $this->path = realpath($path);
         $this->tokens = token_get_all(file_get_contents($this->path));
+        $this->replacement = $replacement;
         $this->searchRequireStatements();
     }
 
@@ -32,7 +34,11 @@ class PhpFile
                 }
 
                 if ($start && $end) {
-                    $this->requireStatements[] = new RequireStatement($this->path, array_slice($this->tokens, $start, $end - $start));
+                    $this->requireStatements[] = new RequireStatement(
+                        $this->path,
+                        array_slice($this->tokens, $start, $end - $start),
+                        $this->replacement
+                    );
                 }
             }
         }

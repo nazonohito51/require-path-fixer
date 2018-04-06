@@ -58,13 +58,13 @@ class File
         return $str;
     }
 
-    public function fixedRequireStatements($requireBase, $constant = null)
+    public function getFixedContents($requireBase, $constant = null)
     {
         $content = file_get_contents($this->path);
 
         foreach ($this->requireStatements as $requireStatement) {
-            if ($fixedContent = $requireStatement->getFixedString($requireBase, $constant)) {
-                $content = str_replace($requireStatement->string(), $fixedContent, $content);
+            if ($fixedString = $requireStatement->getFixedString($requireBase, $constant)) {
+                $content = str_replace($requireStatement->string(), $fixedString, $content);
             }
         }
 

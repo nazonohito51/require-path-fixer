@@ -31,7 +31,7 @@ class FileTest extends TestCase
 
         $this->assertEquals(
             file_get_contents(__DIR__ . '/../fixtures/after/View.php'),
-            $file->fixedRequireStatements(realpath(__DIR__ . '/../../'), 'APP_ROOT')
+            $file->getFixedContents(realpath(__DIR__ . '/../../'), 'APP_ROOT')
         );
     }
 }

@@ -51,7 +51,7 @@ class Fixer
                 }
             }
 
-            $content = $phpFile->fixedRequireStatements($requireBase, $constant);
+            $content = $phpFile->getFixedContents($requireBase, $constant);
             $splFile = new \SplFileObject($file, 'w');
             $splFile->fwrite($content);
         }

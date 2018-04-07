@@ -4,9 +4,39 @@ Legacy php project have a large number of require statements(require/require_onc
 And since they are not homogeneous, it is difficult to collect them all.
 This library searches all require statements and modifies them to be homogeneous code.
 
+[![Latest Stable Version](https://poser.pugx.org/nazonohito51/require-path-fixer/version)](https://packagist.org/packages/nazonohito51/require-path-fixer)
+
+```php
+// before
+require_once 'path/to/file.php';
+require_once __DIR__ . 'path/to/file.php';
+require_once dirname(__FILE__).'path/to/file.php';
+require_once('../repository_root/path/to/file.php');
+require_once      (   'path/' .
+     'to/'                                  .         'file.php'     );
+require 'path/to/file.php';
+include_once 'path/to/file.php';
+include 'path/to/file.php';
+require_once UNKNOWN_CONSTANT . 'path/to/file.php';
+
+// after
+require_once APP_ROOT . '/path/to/file.php';
+require_once APP_ROOT . '/path/to/file.php';
+require_once APP_ROOT . '/path/to/file.php';
+require_once APP_ROOT . '/path/to/file.php';
+require_once APP_ROOT . '/path/to/file.php';
+require APP_ROOT . '/path/to/file.php';
+include_once APP_ROOT . '/path/to/file.php';
+include APP_ROOT . '/path/to/file.php';
+require_once UNKNOWN_CONSTANT . 'path/to/file.php';
+```
+
+## Installation
+
 ## Usage
 
-```
+```php
+require_once __DIR__. '/vendor/autoload.php';
 $fixer = new \RequirePathFixer\Fixer($inspectDirPath);   // It is recommended that $inspectDirPath be a repository root.
 
 // If you have files or directories you don't want to modify, pass the path to this method.
@@ -20,8 +50,8 @@ $fixer->addConstant('COMMON_DIR', '/path/to/common/dir/');   // COMMON_DIR will 
 $fixer->addVariable('$smartyDir', '/path/to/smarty/dir/');   // $smartyDir will be replaced to '/path/to/smarty/dir/'
 
 // Only reporting.
-$fixer->report(__DIR__, 'APP_ROOT');
+$fixer->report(__DIR__, "APP_ROOT");
 
 // Fix all files.
-$fixer->fix(__DIR__, 'APP_ROOT');
+$fixer->fix(__DIR__, "APP_ROOT");
 ```

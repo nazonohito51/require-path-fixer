@@ -5,6 +5,7 @@ use LucidFrame\Console\ConsoleTable;
 use RequirePathFixer\Fixer\PhpFile;
 use RequirePathFixer\Fixer\RequireStatement;
 use Symfony\Component\Finder\Finder;
+use Webmozart\PathUtil\Path;
 
 class Fixer
 {
@@ -107,7 +108,14 @@ class Fixer
     private function guessRequiredFile(RequireStatement $statement)
     {
         $path = $statement->getRequireFile();
-        $path = substr($path, 0 , 1) == DIRECTORY_SEPARATOR ? $path : DIRECTORY_SEPARATOR . $path;
+
+        // ex: '../../hoge/fuga/../test/./conf/config.php' => 'hoge/fuga/../test/./conf/config.php'
+        while (preg_match('|^\.\./|', $path)) {
+            $path = substr($path, 3);
+        }
+        // ex: 'hoge/fuga/../test/./conf/config.php' => 'hoge/test/conf/config.php'
+        $path = Path::canonicalize($path);
+
         $pattern = '/' . preg_quote($path, '/') . '$/';
         $matches = array();
         foreach ($this->files as $file) {

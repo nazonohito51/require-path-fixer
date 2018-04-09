@@ -134,7 +134,7 @@ class Fixer
         $finder = new Finder();
         $iterator = $finder->in($path)->name('*.php')->files();
         foreach ($iterator as $fileInfo) {
-            $this->blackList[] = $fileInfo->getPathname();
+            $this->blackList[] = Path::canonicalize($fileInfo->getPathname());
         }
     }
 

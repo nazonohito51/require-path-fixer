@@ -31,16 +31,32 @@ class RequireStatement
             //   $this->string() == "require_once dirname(__FILE__) . $variable . '/dir/file.php'";
             //   $code == "return dirname('/path/to/this/php/file.php') . 'replacementText' . '/dir/file.php'";
             $code = 'return ';
-            foreach ($this->tokens as $token) {
+            for ($i = 0; $i < count($this->tokens); $i++) {
+                $token = $this->tokens[$i];
+
                 if (isset($token[0]) && in_array($token[0], array(T_REQUIRE, T_REQUIRE_ONCE, T_INCLUDE, T_INCLUDE_ONCE))) {
                     continue;
                 } elseif (isset($token[0]) && $token[0] == T_FILE) {
+                    // __FILE__ -> 'path/to/this/file/file.php'
                     $code .= "'" . $this->file . "'";
                 } elseif (isset($token[0]) && $token[0] == T_DIR) {
+                    // __DIR__ -> 'path/to/this/file/'
                     $code .= "'" . $this->dir() . "'";
+                } elseif (isset($token[0]) && in_array($token[0], array(T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES))) {
+                    // {$variable} or ${variable} -> 'replacementText'
+                    $complexVariableParsedSyntaxTokens = array();
+                    for (; $i < count($this->tokens); $i++) {
+                        $complexVariableParsedSyntaxTokens[] = $this->tokens[$i];
+                        if ($this->tokens[$i] == '}') {
+                            break;
+                        }
+                    }
+                    $code .= $this->replaceComplexVariableParsedSyntax($complexVariableParsedSyntaxTokens);
                 } elseif (isset($token[0]) && $token[0] == T_STRING && $token[1] != 'dirname') {
+                    // CONSTANT -> 'replacementText'
                     $code .= $this->replaceToken($token);
                 } elseif (isset($token[0]) && $token[0] == T_VARIABLE) {
+                    // $variable -> 'replacementText'
                     $code .= $this->replaceToken($token);
                 } elseif (is_array($token)) {
                     $code .= $token[1];
@@ -64,13 +80,28 @@ class RequireStatement
         }
     }
 
+    private function replaceComplexVariableParsedSyntax(array $tokens)
+    {
+        if (count($tokens) == 3 && $tokens[0][0] == T_CURLY_OPEN && $tokens[1][0] == T_VARIABLE && $tokens[2] == '}') {
+            if (isset($this->replacements[$tokens[1][1]])) {
+                return $this->replacements[$tokens[1][1]];
+            }
+        } elseif (count($tokens) == 3 && $tokens[0][0] == T_DOLLAR_OPEN_CURLY_BRACES && $tokens[1][0] == T_STRING_VARNAME && $tokens[2] == '}') {
+            if (isset($this->replacements['$' . $tokens[1][1]])) {
+                return $this->replacements['$' . $tokens[1][1]];
+            }
+        }
+
+        throw new GenerateEvalCodeException($this->file, $tokens);
+    }
+
     private function replaceToken(array $token)
     {
         if (isset($this->replacements[$token[1]])) {
             return "'" . $this->replacements[$token[1]] . "'";
         }
 
-        throw new GenerateEvalCodeException($this->file, $token);
+        throw new GenerateEvalCodeException($this->file, array($token));
     }
 
     private function execStringConcatenation($code)

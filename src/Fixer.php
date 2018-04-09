@@ -13,6 +13,7 @@ class Fixer
     private $files = array();
     private $blackList = array();
     private $replacements = array();
+    private $includePaths = array();
 
     public function __construct($dir)
     {
@@ -49,7 +50,7 @@ class Fixer
 
             foreach ($statements as $statement) {
                 if ($statement->type() == 'relative') {
-                    $this->guessRequiredFile($statement);
+                    $this->guessRequireFile($statement);
                 }
             }
 
@@ -86,7 +87,7 @@ class Fixer
             $table->addHeader('type');
             foreach ($statements as $statement) {
                 if ($statement->type() == 'relative') {
-                    $this->guessRequiredFile($statement);
+                    $this->guessRequireFile($statement);
                 }
 
                 $table->addRow();
@@ -105,10 +106,31 @@ class Fixer
         echo "absolute:{$result['absolute']}, guess:{$result['guess']}, relative:{$result['relative']}, variable:{$result['variable']}, unexpected:{$result['unexpected']}\n";
     }
 
-    private function guessRequiredFile(RequireStatement $statement)
+    private function guessRequireFile(RequireStatement $statement)
     {
         $path = $statement->getRequireFile();
 
+        if ($matchFile = $this->guessRequireFileByIncludePath($path)) {
+            $statement->guess($matchFile);
+        } elseif ($matchFile = $this->guessRequireFileByAllFiles($path)) {
+            $statement->guess($matchFile);
+        }
+    }
+
+    private function guessRequireFileByIncludePath($path)
+    {
+        foreach ($this->includePaths as $includePath) {
+            $joinedPath = Path::canonicalize(Path::join($includePath, $path));
+            if (in_array($joinedPath, $this->files)) {
+                return $joinedPath;
+            }
+        }
+
+        return null;
+    }
+
+    private function guessRequireFileByAllFiles($path)
+    {
         // ex: '../../hoge/fuga/../test/./conf/config.php' => 'hoge/fuga/../test/./conf/config.php'
         while (preg_match('|^\.\./|', $path)) {
             $path = substr($path, 3);
@@ -125,8 +147,10 @@ class Fixer
         }
 
         if (count($matches) === 1) {
-            $statement->guess($matches[0]);
+            return $matches[0];
         }
+
+        return null;
     }
 
     public function addBlackList($path)
@@ -146,5 +170,10 @@ class Fixer
     public function addConstant($constant, $value)
     {
         $this->replacements[$constant] = $value;
+    }
+
+    public function addIncludePath($path)
+    {
+        $this->includePaths[] = $path;
     }
 }

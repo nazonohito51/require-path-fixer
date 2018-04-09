@@ -132,7 +132,7 @@ class Fixer
     public function addBlackList($path)
     {
         $finder = new Finder();
-        $iterator = $finder->in($path)->name('*.php')->files();
+        $iterator = $finder->in($path)->name('*.php')->name('*.inc')->files();
         foreach ($iterator as $fileInfo) {
             $this->blackList[] = Path::canonicalize($fileInfo->getPathname());
         }

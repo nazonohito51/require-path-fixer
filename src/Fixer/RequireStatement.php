@@ -220,7 +220,7 @@ class RequireStatement
         if ($this->type() == 'absolute' || $this->type() == 'guess') {
             $requireFile = $this->getRequireFile();
             if (Path::isAbsolute($requireFile)) {
-                $relativePath = Path::makeRelative($requireFile, $requireBase);
+                $relativePath = Path::makeRelative($requireFile, Path::canonicalize($requireBase));
 
                 $requireString = $this->getRequireString();
                 $base = $constant ? $constant : "'$requireBase'";

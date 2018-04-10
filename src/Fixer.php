@@ -119,7 +119,7 @@ class Fixer
 
     private function guessRequireFileByIncludePath($path)
     {
-        // TODO: if $path start with '.' or '..', don't use include_path.
+        // TODO: if $path start with '.' or '..', don't use include_path. Use currentDir.
         foreach ($this->includePaths as $includePath) {
             $joinedPath = Path::canonicalize(Path::join($includePath, $path));
             if (in_array($joinedPath, $this->files)) {
@@ -177,4 +177,6 @@ class Fixer
     {
         $this->includePaths[] = $path;
     }
+
+    // TODO: add currentDir and disableGuess
 }

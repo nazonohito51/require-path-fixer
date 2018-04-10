@@ -217,7 +217,7 @@ class RequireStatement
 
     public function getFixedString($requireBase, $constant = null)
     {
-        if ($this->type() == 'absolute' || $this->type() == 'guess') {
+        if ($this->isFixable()) {
             $requireFile = $this->getRequireFile();
             if (Path::isAbsolute($requireFile)) {
                 $relativePath = Path::makeRelative($requireFile, Path::canonicalize($requireBase));
@@ -235,5 +235,15 @@ class RequireStatement
     {
         $this->type = 'guess';
         $this->requireFile = $requiredFilePath;
+    }
+
+    public function isFixable()
+    {
+        return ($this->type() == 'absolute' || $this->type() == 'guess');
+    }
+
+    public function isRelative()
+    {
+        return $this->type() == 'relative';
     }
 }

@@ -32,8 +32,9 @@ class Fixer
             }
 
             foreach ($statements as $statement) {
-                if ($statement->type() == 'relative') {
-                    $this->guessRequireFile($statement);
+                if (!$statement->isFixable() && $statement->isRelative()) {
+                    $matchFile = $this->guessRequireFile($statement);
+                    $statement->guess($matchFile);
                 }
             }
 
@@ -88,7 +89,7 @@ class Fixer
 
             $report[$phpFile->path()] = array();
             foreach ($statements as $statement) {
-                if ($statement->type() == 'relative') {
+                if (!$statement->isFixable() && $statement->isRelative()) {
                     $this->guessRequireFile($statement);
                 }
 
@@ -108,10 +109,12 @@ class Fixer
         $path = $statement->getRequireFile();
 
         if ($matchFile = $this->guessRequireFileByIncludePath($path)) {
-            $statement->guess($matchFile);
+            return $matchFile;
         } elseif ($matchFile = $this->guessRequireFileByAllFiles($path)) {
-            $statement->guess($matchFile);
+            return $matchFile;
         }
+
+        return null;
     }
 
     private function guessRequireFileByIncludePath($path)

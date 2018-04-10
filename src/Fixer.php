@@ -10,8 +10,6 @@ use Webmozart\PathUtil\Path;
 
 class Fixer
 {
-    private $blackList = array();
-    private $replacements = array();
     private $includePaths = array();
     private $collection;
 
@@ -27,12 +25,7 @@ class Fixer
 
     public function fix($requireBase, $constant = null)
     {
-        foreach ($this->getFiles() as $file) {
-            if (in_array($file, $this->blackList)) {
-                continue;
-            }
-
-            $phpFile = new PhpFile($file, $this->replacements);
+        foreach ($this->collection as $phpFile) {
             $statements = $phpFile->getRequireStatements();
             if (empty($statements)) {
                 continue;
@@ -45,7 +38,7 @@ class Fixer
             }
 
             $content = $phpFile->getFixedContents($requireBase, $constant);
-            $splFile = new \SplFileObject($file, 'w');
+            $splFile = new \SplFileObject($phpFile->path(), 'w');
             $splFile->fwrite($content);
         }
     }
@@ -87,24 +80,19 @@ class Fixer
     {
         $report = array();
 
-        foreach ($this->getFiles() as $file) {
-            if (in_array($file, $this->blackList)) {
-                continue;
-            }
-
-            $phpFile = new PhpFile($file, $this->replacements);
+        foreach ($this->collection as $phpFile) {
             $statements = $phpFile->getRequireStatements();
             if (empty($statements)) {
                 continue;
             }
 
-            $report[$file] = array();
+            $report[$phpFile->path()] = array();
             foreach ($statements as $statement) {
                 if ($statement->type() == 'relative') {
                     $this->guessRequireFile($statement);
                 }
 
-                $report[$file][] = array(
+                $report[$phpFile->path()][] = array(
                     'before' => $statement->string(),
                     'after' => $statement->getFixedString($requireBase, $constant),
                     'type' => $statement->type(),
@@ -165,21 +153,17 @@ class Fixer
 
     public function addBlackList($path)
     {
-        $finder = new Finder();
-        $iterator = $finder->in($path)->name('*.php')->name('*.inc')->files();
-        foreach ($iterator as $fileInfo) {
-            $this->blackList[] = Path::canonicalize($fileInfo->getPathname());
-        }
+        $this->collection->addBlackList($path);
     }
 
     public function addVariable($variable, $value)
     {
-        $this->replacements[$variable] = $value;
+        $this->collection->addReplacement($variable, $value);
     }
 
     public function addConstant($constant, $value)
     {
-        $this->replacements[$constant] = $value;
+        $this->collection->addReplacement($constant, $value);
     }
 
     public function addIncludePath($path)

@@ -108,6 +108,10 @@ class Fixer
     {
         $path = $statement->getRequireFile();
 
+        // TODO: If $path is absolute, it can't be guessed, throw LogicException.
+        // TODO: If $path start with './', use workingDir, it will be absolute. But if workingDir is not set, guess by match.
+        // TODO: If $path start with '../', use workingDir, it will be absolute. But if workingDir is not set, guess by match.
+        // TODO: If $path don't start with '.', use includePath, it will be absolute. But if includePath is not set, guess by match.
         if ($matchFile = $this->guessRequireFileByIncludePath($path)) {
             return $matchFile;
         } elseif ($matchFile = $this->guessRequireFileByAllFiles($path)) {

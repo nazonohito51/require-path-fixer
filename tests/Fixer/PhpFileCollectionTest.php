@@ -1,0 +1,56 @@
+<?php
+namespace RequirePathFixer\Fixer;
+
+use PHPUnit\Framework\TestCase;
+
+class PhpFileCollectionTest extends TestCase
+{
+    public function testIterativeAccess()
+    {
+        $collection = new PhpFileCollection(__DIR__ . '/../fixtures/before');
+
+        $paths = array();
+        foreach ($collection as $file) {
+            $this->assertInstanceOf(__NAMESPACE__ . '\PhpFile', $file);
+            $paths[] = $file->path();
+        }
+
+        $this->assertCount(4, $paths);
+        $this->assertContains(realpath(__DIR__ . '/../fixtures/before/View.php'), $paths);
+        $this->assertContains(realpath(__DIR__ . '/../fixtures/before/common/Model.php'), $paths);
+        $this->assertContains(realpath(__DIR__ . '/../fixtures/before/conf/config.php'), $paths);
+        $this->assertContains(realpath(__DIR__ . '/../fixtures/before/conf/const.php'), $paths);
+    }
+
+    public function testAddBlackList()
+    {
+        $collection = new PhpFileCollection(__DIR__ . '/../fixtures/before');
+        $collection->addBlackList(__DIR__ . '/../fixtures/before/conf');
+
+        $paths = array();
+        foreach ($collection as $file) {
+            $this->assertInstanceOf(__NAMESPACE__ . '\PhpFile', $file);
+            $paths[] = $file->path();
+        }
+
+        $this->assertCount(2, $paths);
+        $this->assertContains(realpath(__DIR__ . '/../fixtures/before/View.php'), $paths);
+        $this->assertContains(realpath(__DIR__ . '/../fixtures/before/common/Model.php'), $paths);
+        $this->assertNotContains(realpath(__DIR__ . '/../fixtures/before/conf/config.php'), $paths);
+        $this->assertNotContains(realpath(__DIR__ . '/../fixtures/before/conf/const.php'), $paths);
+    }
+
+    public function testMatchFiles()
+    {
+        $modelFilePath = realpath(__DIR__ . '/../fixtures/before/common/Model.php');
+        $collection = new PhpFileCollection(__DIR__ . '/../fixtures/before');
+
+        $this->assertCount(1, $collection->matchFiles(__DIR__ . '/../fixtures/before/common/Model.php'));
+        $this->assertContains($modelFilePath, $collection->matchFiles(__DIR__ . '/../fixtures/before/common/Model.php'));
+        $this->assertCount(1, $collection->matchFiles('common/Model.php'));
+        $this->assertContains($modelFilePath, $collection->matchFiles('common/Model.php'));
+        $this->assertCount(1, $collection->matchFiles('Model.php'));
+        $this->assertContains($modelFilePath, $collection->matchFiles('Model.php'));
+        $this->assertCount(0, $collection->matchFiles('conf/Model.php'));
+    }
+}

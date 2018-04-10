@@ -20,6 +20,11 @@ class PhpFile
         $this->searchRequireStatements();
     }
 
+    public function path()
+    {
+        return $this->path;
+    }
+
     private function searchRequireStatements()
     {
         for ($index = 0; $index < count($this->tokens); $index++) {

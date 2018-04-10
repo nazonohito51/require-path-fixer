@@ -3,41 +3,31 @@ namespace RequirePathFixer;
 
 use LucidFrame\Console\ConsoleTable;
 use RequirePathFixer\Fixer\PhpFile;
+use RequirePathFixer\Fixer\PhpFileCollection;
 use RequirePathFixer\Fixer\RequireStatement;
 use Symfony\Component\Finder\Finder;
 use Webmozart\PathUtil\Path;
 
 class Fixer
 {
-    private $path;
-    private $files = array();
     private $blackList = array();
     private $replacements = array();
     private $includePaths = array();
+    private $collection;
 
     public function __construct($dir)
     {
-        $dir = realpath($dir);
-        if (!is_dir($dir)) {
-            throw new \InvalidArgumentException("{$dir} is not directory.");
-        }
-
-        $this->path = $dir;
-        $finder = new Finder();
-        $iterator = $finder->in($dir)->name('*.php')->name('*.inc')->files();
-        foreach ($iterator as $fileInfo) {
-            $this->files[] = $fileInfo->getPathname();
-        }
+        $this->collection = new PhpFileCollection($dir);
     }
 
     public function getFiles()
     {
-        return $this->files;
+        return $this->collection->getFiles();
     }
 
     public function fix($requireBase, $constant = null)
     {
-        foreach ($this->files as $file) {
+        foreach ($this->getFiles() as $file) {
             if (in_array($file, $this->blackList)) {
                 continue;
             }
@@ -97,7 +87,7 @@ class Fixer
     {
         $report = array();
 
-        foreach ($this->files as $file) {
+        foreach ($this->getFiles() as $file) {
             if (in_array($file, $this->blackList)) {
                 continue;
             }
@@ -141,7 +131,7 @@ class Fixer
         // TODO: if $path start with '.' or '..', don't use include_path. Use currentDir.
         foreach ($this->includePaths as $includePath) {
             $joinedPath = Path::canonicalize(Path::join($includePath, $path));
-            if (in_array($joinedPath, $this->files)) {
+            if (in_array($joinedPath, $this->getFiles())) {
                 return $joinedPath;
             }
         }
@@ -160,7 +150,7 @@ class Fixer
 
         $pattern = '/' . preg_quote($path, '/') . '$/';
         $matches = array();
-        foreach ($this->files as $file) {
+        foreach ($this->getFiles() as $file) {
             if (preg_match($pattern, $file)) {
                 $matches[] = $file;
             }

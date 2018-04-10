@@ -5,6 +5,19 @@ use PHPUnit\Framework\TestCase;
 
 class PhpFileCollectionTest extends TestCase
 {
+    public function testGetFiles()
+    {
+        $collection = new PhpFileCollection(__DIR__ . '/../fixtures/before');
+
+        $files = $collection->getFiles();
+
+        $this->assertCount(4, $files);
+        $this->assertContains(realpath(__DIR__ . '/../fixtures/before/View.php'), $files);
+        $this->assertContains(realpath(__DIR__ . '/../fixtures/before/common/Model.php'), $files);
+        $this->assertContains(realpath(__DIR__ . '/../fixtures/before/conf/config.php'), $files);
+        $this->assertContains(realpath(__DIR__ . '/../fixtures/before/conf/const.php'), $files);
+    }
+
     public function testIterativeAccess()
     {
         $collection = new PhpFileCollection(__DIR__ . '/../fixtures/before');

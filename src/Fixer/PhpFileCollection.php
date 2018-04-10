@@ -27,6 +27,11 @@ class PhpFileCollection implements \Iterator
         }
     }
 
+    public function getFiles()
+    {
+        return $this->files;
+    }
+
     public function addReplacement($key, $value)
     {
         $this->replacements[$key] = $value;

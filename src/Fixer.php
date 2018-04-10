@@ -62,13 +62,40 @@ class Fixer
 
     public function report($requireBase, $constant = null)
     {
-        $result = array(
+        $aggregate = array(
             'absolute' => 0,
             'guess' => 0,
             'relative' => 0,
             'variable' => 0,
             'unexpected' => 0,
         );
+
+        foreach ($this->reportByArray($requireBase, $constant) as $file => $statements) {
+            $table = new ConsoleTable();
+            $table->addHeader('before');
+            $table->addHeader('after');
+            $table->addHeader('type');
+
+            foreach ($statements as $statement) {
+                $table->addRow();
+                $table->addColumn($statement['before']);
+                $table->addColumn($statement['after']);
+                $table->addColumn($statement['type']);
+
+                $aggregate[$statement['type']]++;
+            }
+
+            echo $file . "\n";
+            $table->display();
+            echo "\n\n";
+        }
+
+        echo "absolute:{$aggregate['absolute']}, guess:{$aggregate['guess']}, relative:{$aggregate['relative']}, variable:{$aggregate['variable']}, unexpected:{$aggregate['unexpected']}\n";
+    }
+
+    public function reportByArray($requireBase, $constant = null)
+    {
+        $report = array();
 
         foreach ($this->files as $file) {
             if (in_array($file, $this->blackList)) {
@@ -81,29 +108,21 @@ class Fixer
                 continue;
             }
 
-            $table = new ConsoleTable();
-            $table->addHeader('before');
-            $table->addHeader('after');
-            $table->addHeader('type');
+            $report[$file] = array();
             foreach ($statements as $statement) {
                 if ($statement->type() == 'relative') {
                     $this->guessRequireFile($statement);
                 }
 
-                $table->addRow();
-                $table->addColumn($statement->string());
-                $table->addColumn($statement->getFixedString($requireBase, $constant));
-                $table->addColumn($statement->type());
-
-                $result[$statement->type()]++;
+                $report[$file][] = array(
+                    'before' => $statement->string(),
+                    'after' => $statement->getFixedString($requireBase, $constant),
+                    'type' => $statement->type(),
+                );
             }
-
-            echo $file . "\n";
-            $table->display();
-            echo "\n\n";
         }
 
-        echo "absolute:{$result['absolute']}, guess:{$result['guess']}, relative:{$result['relative']}, variable:{$result['variable']}, unexpected:{$result['unexpected']}\n";
+        return $report;
     }
 
     private function guessRequireFile(RequireStatement $statement)

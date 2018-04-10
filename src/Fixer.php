@@ -10,8 +10,10 @@ use Webmozart\PathUtil\Path;
 
 class Fixer
 {
-    private $includePaths = array();
     private $collection;
+
+    private $includePaths = array();
+    private $workingDir;
 
     public function __construct($dir)
     {
@@ -175,7 +177,20 @@ class Fixer
 
     public function addIncludePath($path)
     {
-        $this->includePaths[] = $path;
+        if (is_dir($dir = realpath($path))) {
+            $this->includePaths[] = $dir;
+        }
+
+        throw new \InvalidArgumentException("{$path} is not a directory.");
+    }
+
+    public function setWorkingDir($path)
+    {
+        if (is_dir($dir = realpath($path))) {
+            $this->workingDir = $dir;
+        }
+
+        throw new \InvalidArgumentException("{$path} is not a directory.");
     }
 
     // TODO: add currentDir and disableGuess

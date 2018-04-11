@@ -52,9 +52,8 @@ class PhpFileCollection implements \Iterator
         }
     }
 
-    public function matchFiles($path)
+    public function matches($path)
     {
-        // TODO: if $path start with './', must use currentDir.
         // ex: '../../hoge/fuga/../test/./conf/config.php' => 'hoge/fuga/../test/./conf/config.php'
         while (preg_match('|^\.\./|', $path)) {
             $path = substr($path, 3);

@@ -109,53 +109,28 @@ class Fixer
 
     private function guessRequireFile(RequireStatement $statement)
     {
-        $path = $statement->getRequireFile();
-
-        // TODO: If $path is absolute, it can't be guessed, throw LogicException.
-        // TODO: If $path start with './', use workingDir, it will be absolute. But if workingDir is not set, guess by match.
-        // TODO: If $path start with '../', use workingDir, it will be absolute. But if workingDir is not set, guess by match.
-        // TODO: If $path don't start with '.', use includePath, it will be absolute. But if includePath is not set, guess by match.
-        if ($matchFile = $this->guessRequireFileByIncludePath($path)) {
-            return $matchFile;
-        } elseif ($matchFile = $this->guessRequireFileByAllFiles($path)) {
-            return $matchFile;
+        if (Path::isAbsolute($path = $statement->getRequireFile())) {
+            throw new \LogicException("{$path} can not be guessed because \$path is a absolute path.");
         }
+        // TODO: If $statement is 'include' or 'include_once', it should not be guessed.
 
-        return null;
-    }
-
-    private function guessRequireFileByIncludePath($path)
-    {
-        // TODO: if $path start with '.' or '..', don't use include_path. Use currentDir.
-        foreach ($this->includePaths as $includePath) {
-            $joinedPath = Path::canonicalize(Path::join($includePath, $path));
-            if (in_array($joinedPath, $this->getFiles())) {
-                return $joinedPath;
+        if (substr($path, 0, 1) === '.' && !is_null($this->workingDir)) {
+            // TODO: If $path start with './', use workingDir, it will be absolute. But if workingDir is not set, guess by match.
+            // TODO: If $path start with '../', use workingDir, it will be absolute. But if workingDir is not set, guess by match.
+            return Path::join($this->workingDir, $path);
+        } elseif (substr($path, 0, 1) !== '.' && !empty($this->includePaths)) {
+            // TODO: If $path don't start with '.', use includePath, it will be absolute. But if includePath is not set, guess by match.
+            foreach ($this->includePaths as $includePath) {
+                $files = $this->collection->matches(Path::join($includePath, $path));
+                if (count($files) === 1) {
+                    return $files[0];
+                }
             }
-        }
-
-        return null;
-    }
-
-    private function guessRequireFileByAllFiles($path)
-    {
-        // ex: '../../hoge/fuga/../test/./conf/config.php' => 'hoge/fuga/../test/./conf/config.php'
-        while (preg_match('|^\.\./|', $path)) {
-            $path = substr($path, 3);
-        }
-        // ex: 'hoge/fuga/../test/./conf/config.php' => 'hoge/test/conf/config.php'
-        $path = Path::canonicalize($path);
-
-        $pattern = '/' . preg_quote($path, '/') . '$/';
-        $matches = array();
-        foreach ($this->getFiles() as $file) {
-            if (preg_match($pattern, $file)) {
-                $matches[] = $file;
+        } else {
+            $files = $this->collection->matches($path);
+            if (count($files) === 1) {
+                return $files[0];
             }
-        }
-
-        if (count($matches) === 1) {
-            return $matches[0];
         }
 
         return null;

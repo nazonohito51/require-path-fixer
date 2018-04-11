@@ -53,17 +53,17 @@ class PhpFileCollectionTest extends TestCase
         $this->assertNotContains(realpath(__DIR__ . '/../fixtures/before/conf/const.php'), $paths);
     }
 
-    public function testMatchFiles()
+    public function testMatches()
     {
         $modelFilePath = realpath(__DIR__ . '/../fixtures/before/common/Model.php');
         $collection = new PhpFileCollection(__DIR__ . '/../fixtures/before');
 
-        $this->assertCount(1, $collection->matchFiles(__DIR__ . '/../fixtures/before/common/Model.php'));
-        $this->assertContains($modelFilePath, $collection->matchFiles(__DIR__ . '/../fixtures/before/common/Model.php'));
-        $this->assertCount(1, $collection->matchFiles('common/Model.php'));
-        $this->assertContains($modelFilePath, $collection->matchFiles('common/Model.php'));
-        $this->assertCount(1, $collection->matchFiles('Model.php'));
-        $this->assertContains($modelFilePath, $collection->matchFiles('Model.php'));
-        $this->assertCount(0, $collection->matchFiles('conf/Model.php'));
+        $this->assertCount(1, $collection->matches(__DIR__ . '/../fixtures/before/common/Model.php'));
+        $this->assertContains($modelFilePath, $collection->matches(__DIR__ . '/../fixtures/before/common/Model.php'));
+        $this->assertCount(1, $collection->matches('common/Model.php'));
+        $this->assertContains($modelFilePath, $collection->matches('common/Model.php'));
+        $this->assertCount(1, $collection->matches('Model.php'));
+        $this->assertContains($modelFilePath, $collection->matches('Model.php'));
+        $this->assertCount(0, $collection->matches('conf/Model.php'));
     }
 }

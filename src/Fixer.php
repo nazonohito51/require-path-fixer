@@ -78,7 +78,7 @@ class Fixer
             echo "\n\n";
         }
 
-        echo "absolute:{$aggregate['absolute']}, guess:{$aggregate['guess']}, relative:{$aggregate['relative']}, variable:{$aggregate['variable']}, unexpected:{$aggregate['unexpected']}\n";
+        echo "absolute:{$aggregate['absolute']}, unique:{$aggregate['unique']}, working_dir:{$aggregate['working_dir']}, include_path:{$aggregate['include_path']}, relative:{$aggregate['relative']}, variable:{$aggregate['variable']}, unexpected:{$aggregate['unexpected']}\n";
     }
 
     public function reportByArray($requireBase, $constant = null)

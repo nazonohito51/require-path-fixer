@@ -141,58 +141,11 @@ class RequireStatement
         return $info['dirname'];
     }
 
-    private function getPathString()
-    {
-        if ($token = $this->firstToken(array(T_CONSTANT_ENCAPSED_STRING))) {
-            return preg_replace('/["\']/', '', $token[1]);
-        }
-
-        return null;
-    }
-
     private function getRequireString()
     {
         $token = $this->firstToken(array(T_REQUIRE, T_REQUIRE_ONCE, T_INCLUDE, T_INCLUDE_ONCE));
 
         return $token[1];
-    }
-
-    private function haveVariable()
-    {
-        return !is_null($this->firstToken(array(T_VARIABLE)));
-    }
-
-    private function haveConstant()
-    {
-        $stringTokens = $this->allToken(array(T_STRING));
-
-        foreach ($stringTokens as $stringToken) {
-            if ($stringToken[1] != 'dirname') {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private function haveMagicConstant()
-    {
-        return $this->haveDirname() || $this->haveDir();
-    }
-
-    private function haveDir()
-    {
-        return $this->firstToken(array(T_DIR)) ? true : false;
-    }
-
-    private function haveDirname()
-    {
-        $dirnameToken = $this->firstToken(array(T_STRING));
-        $fileToken = $this->firstToken(array(T_FILE));
-        return (
-            $dirnameToken &&
-            $dirnameToken[1] == 'dirname' &&
-            $fileToken
-        ) ? true : false;
     }
 
     private function firstToken(array $tokenType)

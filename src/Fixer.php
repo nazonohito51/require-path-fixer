@@ -36,7 +36,7 @@ class Fixer
             foreach ($statements as $statement) {
                 if (!$statement->isFixable() && $statement->isRelative()) {
                     $matchFile = $this->guessRequireFile($statement);
-                    $statement->guess($matchFile);
+                    $statement->guessFromUnique($matchFile);
                 }
             }
 
@@ -50,7 +50,9 @@ class Fixer
     {
         $aggregate = array(
             'absolute' => 0,
-            'guess' => 0,
+            'unique' => 0,
+            'working_dir' => 0,
+            'include_path' => 0,
             'relative' => 0,
             'variable' => 0,
             'unexpected' => 0,
@@ -93,7 +95,7 @@ class Fixer
             foreach ($statements as $statement) {
                 if (!$statement->isFixable() && $statement->isRelative()) {
                     $matchFile = $this->guessRequireFile($statement);
-                    $statement->guess($matchFile);
+                    $statement->guessFromUnique($matchFile);
                 }
 
                 $report[$phpFile->path()][] = array(

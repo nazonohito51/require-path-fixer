@@ -13,7 +13,7 @@ class RequireStatement
     private $type;
     private $replacements = array();
 
-//    const TYPE = array('absolute', 'relative', 'guess', 'variable', 'unexpected');
+//    const TYPE = array('absolute', 'unique', 'working_dir', 'include_path', 'relative', 'variable', 'unexpected');
 
     public function __construct($file, array $tokens, array $replacement = array())
     {
@@ -106,6 +106,7 @@ class RequireStatement
 
     private function execStringConcatenation($code)
     {
+        // TODO: error_reporting(E_ALL) -> set_error_handler -> error_reporting($tmp) -> restore_error_handler
         $path = eval($code);
         if (empty($path)) {
             throw new EvalException($code, $path);
@@ -231,15 +232,39 @@ class RequireStatement
         return null;
     }
 
-    public function guess($requiredFilePath)
+    public function guessFromUnique($requiredFilePath)
     {
-        $this->type = 'guess';
+        if (!Path::isAbsolute($requiredFilePath)) {
+            throw new \LogicException("{$requiredFilePath} is not absolute path.");
+        }
+
+        $this->type = 'unique';
+        $this->requireFile = $requiredFilePath;
+    }
+
+    public function guessFromWorkingDir($requiredFilePath)
+    {
+        if (!Path::isAbsolute($requiredFilePath)) {
+            throw new \LogicException("{$requiredFilePath} is not absolute path.");
+        }
+
+        $this->type = 'working_dir';
+        $this->requireFile = $requiredFilePath;
+    }
+
+    public function guessFromIncludePath($requiredFilePath)
+    {
+        if (!Path::isAbsolute($requiredFilePath)) {
+            throw new \LogicException("{$requiredFilePath} is not absolute path.");
+        }
+
+        $this->type = 'include_path';
         $this->requireFile = $requiredFilePath;
     }
 
     public function isFixable()
     {
-        return ($this->type() == 'absolute' || $this->type() == 'guess');
+        return ($this->type() == 'absolute' || $this->type() == 'unique' || $this->type() == 'working_dir' || $this->type() == 'include_path');
     }
 
     public function isRelative()

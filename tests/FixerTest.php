@@ -39,7 +39,7 @@ class FixerTest extends TestCase
         $this->assertContains(array(
             'before' => "require_once 'common/Model.php';",
             'after' => "require_once APP_ROOT . '/tests/fixtures/before/common/Model.php';",
-            'type' => 'guess',
+            'type' => 'unique',
         ), $report[$viewFilePath]);
         $this->assertContains(array(
             'before' => "require_once \$type . 'Model.php';",
@@ -96,7 +96,7 @@ class FixerTest extends TestCase
         $this->assertContains(array(
             'before' => "require_once 'common/Model.php';",
             'after' => "require_once APP_ROOT . '/tests/fixtures/before/common/Model.php';",
-            'type' => 'guess',
+            'type' => 'unique',
         ), $report[$viewFilePath]);
         $this->assertContains(array(
             'before' => "require_once \$type . 'Model.php';",

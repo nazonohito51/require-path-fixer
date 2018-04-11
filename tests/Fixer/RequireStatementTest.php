@@ -270,7 +270,7 @@ class RequireStatementTest extends TestCase
         $this->assertNull($statement->getFixedString(realpath(__DIR__ . '/../../'), 'APP_ROOT'));
     }
 
-    public function testGuess()
+    public function testGuessFromUnique()
     {
         $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', array(
             array(T_REQUIRE_ONCE, 'require_once', 4),
@@ -280,12 +280,50 @@ class RequireStatementTest extends TestCase
             ';'
         ));
 
-        $statement->guess(realpath(__DIR__ . '/../fixtures/before/common/Model.php'));
+        $statement->guessFromUnique(realpath(__DIR__ . '/../fixtures/before/common/Model.php'));
 
         $this->assertEquals(
             "require_once APP_ROOT . '/tests/fixtures/before/common/Model.php';",
             $statement->getFixedString(realpath(__DIR__ . '/../../'), 'APP_ROOT')
         );
-        $this->assertEquals('guess', $statement->type());
+        $this->assertEquals('unique', $statement->type());
+    }
+
+    public function testGuessFromWorkingDir()
+    {
+        $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', array(
+            array(T_REQUIRE_ONCE, 'require_once', 4),
+            '(',
+            array(T_CONSTANT_ENCAPSED_STRING, '"common/Model.php"', 4),
+            ')',
+            ';'
+        ));
+
+        $statement->guessFromWorkingDir(realpath(__DIR__ . '/../fixtures/before/common/Model.php'));
+
+        $this->assertEquals(
+            "require_once APP_ROOT . '/tests/fixtures/before/common/Model.php';",
+            $statement->getFixedString(realpath(__DIR__ . '/../../'), 'APP_ROOT')
+        );
+        $this->assertEquals('working_dir', $statement->type());
+    }
+
+    public function testGuessFromIncludePath()
+    {
+        $statement = new RequireStatement(__DIR__ . '/../fixtures/before/View.php', array(
+            array(T_REQUIRE_ONCE, 'require_once', 4),
+            '(',
+            array(T_CONSTANT_ENCAPSED_STRING, '"common/Model.php"', 4),
+            ')',
+            ';'
+        ));
+
+        $statement->guessFromIncludePath(realpath(__DIR__ . '/../fixtures/before/common/Model.php'));
+
+        $this->assertEquals(
+            "require_once APP_ROOT . '/tests/fixtures/before/common/Model.php';",
+            $statement->getFixedString(realpath(__DIR__ . '/../../'), 'APP_ROOT')
+        );
+        $this->assertEquals('include_path', $statement->type());
     }
 }

@@ -92,7 +92,8 @@ class Fixer
             $report[$phpFile->path()] = array();
             foreach ($statements as $statement) {
                 if (!$statement->isFixable() && $statement->isRelative()) {
-                    $this->guessRequireFile($statement);
+                    $matchFile = $this->guessRequireFile($statement);
+                    $statement->guess($matchFile);
                 }
 
                 $report[$phpFile->path()][] = array(

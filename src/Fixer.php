@@ -28,22 +28,11 @@ class Fixer
 
     public function fix($requireBase, $constant = null)
     {
-        foreach ($this->collection as $phpFile) {
-            $statements = $phpFile->getRequireStatements();
-            if (empty($statements)) {
-                continue;
-            }
-
-            foreach ($statements as $statement) {
-                if (!$statement->isFixable() && $statement->isRelative()) {
-                    $this->guessRequireFile($statement);
-                }
-            }
-
+        $this->run(function (PhpFile $phpFile) use ($requireBase, $constant) {
             $content = $phpFile->getFixedContents($requireBase, $constant);
             $splFile = new \SplFileObject($phpFile->path(), 'w');
             $splFile->fwrite($content);
-        }
+        });
     }
 
     public function report($requireBase, $constant = null)
@@ -58,25 +47,25 @@ class Fixer
             'unexpected' => 0,
         );
 
-        foreach ($this->reportByArray($requireBase, $constant) as $file => $statements) {
+        $this->run(function (PhpFile $phpFile) use (&$aggregate, $requireBase, $constant) {
             $table = new ConsoleTable();
             $table->addHeader('before');
             $table->addHeader('after');
             $table->addHeader('type');
 
-            foreach ($statements as $statement) {
+            foreach ($phpFile->getRequireStatements() as $statement) {
                 $table->addRow();
-                $table->addColumn($statement['before']);
-                $table->addColumn($statement['after']);
-                $table->addColumn($statement['type']);
+                $table->addColumn($statement->string());
+                $table->addColumn($statement->getFixedString($requireBase, $constant));
+                $table->addColumn($statement->type());
 
-                $aggregate[$statement['type']]++;
+                $aggregate[$statement->type()]++;
             }
 
-            echo $file . "\n";
+            echo $phpFile->path() . "\n";
             $table->display();
             echo "\n\n";
-        }
+        });
 
         echo "absolute:{$aggregate['absolute']}, unique:{$aggregate['unique']}, working_dir:{$aggregate['working_dir']}, include_path:{$aggregate['include_path']}, relative:{$aggregate['relative']}, variable:{$aggregate['variable']}, unexpected:{$aggregate['unexpected']}\n";
     }
@@ -84,28 +73,38 @@ class Fixer
     public function reportByArray($requireBase, $constant = null)
     {
         $report = array();
-
-        foreach ($this->collection as $phpFile) {
-            $statements = $phpFile->getRequireStatements();
-            if (empty($statements)) {
-                continue;
-            }
-
+        $this->run(function (PhpFile $phpFile) use (&$report, $requireBase, $constant) {
             $report[$phpFile->path()] = array();
-            foreach ($statements as $statement) {
-                if (!$statement->isFixable() && $statement->isRelative()) {
-                    $this->guessRequireFile($statement);
-                }
-
+            foreach ($phpFile->getRequireStatements() as $statement) {
                 $report[$phpFile->path()][] = array(
                     'before' => $statement->string(),
                     'after' => $statement->getFixedString($requireBase, $constant),
                     'type' => $statement->type(),
                 );
             }
-        }
+        });
 
         return $report;
+    }
+
+    private function run(callable $procedure = null)
+    {
+        foreach ($this->collection as $phpFile) {
+            $statements = $phpFile->getRequireStatements();
+            if (empty($statements)) {
+                continue;
+            }
+
+            foreach ($statements as $statement) {
+                if (!$statement->isFixable() && $statement->isRelative()) {
+                    $this->guessRequireFile($statement);
+                }
+            }
+
+            if ($procedure) {
+                $procedure($phpFile);
+            }
+        }
     }
 
     private function guessRequireFile(RequireStatement $statement)

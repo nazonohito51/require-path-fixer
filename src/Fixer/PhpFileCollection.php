@@ -54,7 +54,7 @@ class PhpFileCollection implements \Iterator
 
     public function matches($path)
     {
-        // ex: '../../hoge/fuga/../test/./conf/config.php' => 'hoge/fuga/../test/./conf/config.php'
+        // ex: './../hoge/fuga/../test/./conf/config.php' => 'hoge/fuga/../test/./conf/config.php'
         while (preg_match('|^\.\.*/|', $path)) {
             $path = preg_replace('|^\.\.*/|', '', $path);
         }
@@ -62,7 +62,12 @@ class PhpFileCollection implements \Iterator
         // ex: 'hoge/fuga/../test/./conf/config.php' => 'hoge/test/conf/config.php'
         $path = Path::canonicalize($path);
 
-        // ex: 'hoge/test/conf/config.php' => '/hoge\/test\/conf\/config\.php$/'
+        if (Path::isRelative($path) && !strpos($path, DIRECTORY_SEPARATOR)) {
+            // ex: 'config.php' -> '/config.php'
+            $path = '/' . $path;
+        }
+
+        // ex: 'hoge/test/conf/config.php' => '/\/hoge\/test\/conf\/config\.php$/'
         $pattern = '/' . preg_quote($path, '/') . '$/';
         $matches = array();
         foreach ($this->files as $file) {

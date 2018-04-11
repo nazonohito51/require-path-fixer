@@ -65,7 +65,7 @@ class RequireStatement
                 }
             }
 
-            $this->requireFile = Path::canonicalize($this->execStringConcatenation($code));
+            $this->requireFile = $this->execStringConcatenation($code);
             if (Path::isAbsolute($this->requireFile)) {
                 $this->type = 'absolute';
             } else {

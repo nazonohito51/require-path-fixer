@@ -35,8 +35,7 @@ class Fixer
 
             foreach ($statements as $statement) {
                 if (!$statement->isFixable() && $statement->isRelative()) {
-                    $matchFile = $this->guessRequireFile($statement);
-                    $statement->guessFromUnique($matchFile);
+                    $this->guessRequireFile($statement);
                 }
             }
 
@@ -94,8 +93,7 @@ class Fixer
             $report[$phpFile->path()] = array();
             foreach ($statements as $statement) {
                 if (!$statement->isFixable() && $statement->isRelative()) {
-                    $matchFile = $this->guessRequireFile($statement);
-                    $statement->guessFromUnique($matchFile);
+                    $this->guessRequireFile($statement);
                 }
 
                 $report[$phpFile->path()][] = array(
@@ -119,23 +117,22 @@ class Fixer
         if (substr($path, 0, 1) === '.' && !is_null($this->workingDir)) {
             // TODO: If $path start with './', use workingDir, it will be absolute. But if workingDir is not set, guess by match.
             // TODO: If $path start with '../', use workingDir, it will be absolute. But if workingDir is not set, guess by match.
-            return Path::join($this->workingDir, $path);
+            $statement->guessFromWorkingDir(Path::join($this->workingDir, $path));
         } elseif (substr($path, 0, 1) !== '.' && !empty($this->includePaths)) {
             // TODO: If $path don't start with '.', use includePath, it will be absolute. But if includePath is not set, guess by match.
             foreach ($this->includePaths as $includePath) {
                 $files = $this->collection->matches(Path::join($includePath, $path));
                 if (count($files) === 1) {
-                    return $files[0];
+                    $statement->guessFromIncludePath($files[0]);
+                    break;
                 }
             }
         } else {
             $files = $this->collection->matches($path);
             if (count($files) === 1) {
-                return $files[0];
+                $statement->guessFromUnique($files[0]);
             }
         }
-
-        return null;
     }
 
     public function addBlackList($path)
@@ -153,22 +150,27 @@ class Fixer
         $this->collection->addReplacement($constant, $value);
     }
 
-    public function addIncludePath($path)
+    public function setIncludePath($includePath)
     {
-        if (is_dir($dir = realpath($path))) {
-            $this->includePaths[] = $dir;
-        }
+        $paths = explode(':', $includePath);
 
-        throw new \InvalidArgumentException("{$path} is not a directory.");
+        $this->includePaths = array();
+        foreach ($paths as $path) {
+            if (is_dir($dir = realpath($path))) {
+                $this->includePaths[] = $dir;
+            } else {
+                throw new \InvalidArgumentException("{$path} is not a directory.");
+            }
+        }
     }
 
-    public function setWorkingDir($path)
+    public function setWorkingDir($workingDir)
     {
-        if (is_dir($dir = realpath($path))) {
+        if (is_dir($dir = realpath($workingDir))) {
             $this->workingDir = $dir;
+        } else {
+            throw new \InvalidArgumentException("{$workingDir} is not a directory.");
         }
-
-        throw new \InvalidArgumentException("{$path} is not a directory.");
     }
 
     // TODO: add currentDir and disableGuess

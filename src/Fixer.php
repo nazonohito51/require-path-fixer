@@ -111,15 +111,15 @@ class Fixer
     {
         if (Path::isAbsolute($path = $statement->getRequireFile())) {
             throw new \LogicException("{$path} can not be guessed because \$path is a absolute path.");
+        } elseif ($statement->isIncludeStatement()) {
+            // If $statement is 'include' or 'include_once', there is a possibility that this statement is currently failing to read.
+            // In that case, since reading will be successful by modifying it, do not do modify.
+            return;
         }
-        // TODO: If $statement is 'include' or 'include_once', it should not be guessed.
 
         if (substr($path, 0, 1) === '.' && !is_null($this->workingDir)) {
-            // TODO: If $path start with './', use workingDir, it will be absolute. But if workingDir is not set, guess by match.
-            // TODO: If $path start with '../', use workingDir, it will be absolute. But if workingDir is not set, guess by match.
             $statement->guessFromWorkingDir(Path::join($this->workingDir, $path));
         } elseif (substr($path, 0, 1) !== '.' && !empty($this->includePaths)) {
-            // TODO: If $path don't start with '.', use includePath, it will be absolute. But if includePath is not set, guess by match.
             foreach ($this->includePaths as $includePath) {
                 $files = $this->collection->matches(Path::join($includePath, $path));
                 if (count($files) === 1) {

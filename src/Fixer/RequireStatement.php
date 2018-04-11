@@ -141,7 +141,7 @@ class RequireStatement
         return $info['dirname'];
     }
 
-    private function getRequireString()
+    private function getRequireTokenString()
     {
         $token = $this->firstToken(array(T_REQUIRE, T_REQUIRE_ONCE, T_INCLUDE, T_INCLUDE_ONCE));
 
@@ -176,7 +176,7 @@ class RequireStatement
             if (Path::isAbsolute($requireFile)) {
                 $relativePath = Path::makeRelative($requireFile, Path::canonicalize($requireBase));
 
-                $requireString = $this->getRequireString();
+                $requireString = $this->getRequireTokenString();
                 $base = $constant ? $constant : "'$requireBase'";
                 return "{$requireString} {$base} . '/{$relativePath}';";
             }
@@ -223,5 +223,10 @@ class RequireStatement
     public function isRelative()
     {
         return $this->type() == 'relative';
+    }
+
+    public function isIncludeStatement()
+    {
+        return !is_null($this->firstToken(array(T_INCLUDE, T_INCLUDE_ONCE)));
     }
 }

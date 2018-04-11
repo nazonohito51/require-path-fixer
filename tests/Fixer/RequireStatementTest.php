@@ -16,6 +16,7 @@ class RequireStatementTest extends TestCase
         ));
 
         $this->assertEquals('require_once("common/Model.php");', $statement->string());
+        $this->assertFalse($statement->isIncludeStatement());
     }
 
     public function testGetRequireFile()

@@ -12,6 +12,7 @@ class RequireStatement
     private $tokens;
     private $type;
     private $replacements = array();
+    private $evalCode;
 
 //    const TYPE = array('absolute', 'unique', 'working_dir', 'include_path', 'relative', 'variable', 'unexpected');
 
@@ -106,13 +107,25 @@ class RequireStatement
 
     private function execStringConcatenation($code)
     {
-        // TODO: error_reporting(E_ALL) -> set_error_handler -> error_reporting($tmp) -> restore_error_handler
+        $beforeErrorReporting = error_reporting();
+        error_reporting(E_ALL);
+        set_error_handler(array($this, 'handleEvalError'));
+
+        $this->evalCode = $code;
         $path = eval($code);
         if (empty($path)) {
             throw new EvalException($code, $path);
         }
 
+        error_reporting($beforeErrorReporting);
+        restore_error_handler();
+
         return $path;
+    }
+
+    private function handleEvalError($errno, $errstr)
+    {
+        throw new EvalException($this->evalCode, "\$errno:{$errno}, \$errstr:{$errstr}");
     }
 
     public function string()

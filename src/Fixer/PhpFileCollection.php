@@ -86,7 +86,6 @@ class PhpFileCollection implements \Iterator
 
     public function next()
     {
-        //TODO: blacklist or empty require statement
         do {
             $this->position++;
         } while ($this->valid() && in_array($this->files[$this->position], $this->blackList));

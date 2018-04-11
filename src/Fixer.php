@@ -14,7 +14,9 @@ class Fixer
 
     private $includePaths = array();
     private $workingDir;
+
     private $guessable = true;
+    private $guessOnInclude = false;
 
     public function __construct($dir)
     {
@@ -113,7 +115,7 @@ class Fixer
             throw new \LogicException("{$path} can not be guessed because \$path is a absolute path.");
         } elseif (!$this->guessable) {
             return;
-        } elseif ($statement->isIncludeStatement()) {
+        } elseif ($statement->isIncludeStatement() && !$this->guessOnInclude) {
             // If $statement is 'include' or 'include_once', there is a possibility that this statement is currently failing to read.
             // In that case, since reading will be successful by modifying it, do not do modify.
             return;
@@ -178,5 +180,10 @@ class Fixer
     public function disableGuess()
     {
         $this->guessable = false;
+    }
+
+    public function enableGuessOnIncludeStatement()
+    {
+        $this->guessOnInclude = true;
     }
 }

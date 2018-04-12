@@ -11,6 +11,7 @@ class PhpFileCollection implements \Iterator
     private $files = array();
     private $replacements = array();
     private $blackList = array();
+    private $whiteList = array();
 
     public function __construct($dir)
     {
@@ -52,6 +53,21 @@ class PhpFileCollection implements \Iterator
         }
     }
 
+    public function addWhiteList($path)
+    {
+        if (is_file($path)) {
+            $this->whiteList[] = Path::canonicalize($path);
+        } elseif (is_dir($path)) {
+            $finder = new Finder();
+            $iterator = $finder->in($path)->name('*.php')->name('*.inc')->files();
+            foreach ($iterator as $fileInfo) {
+                $this->whiteList[] = Path::canonicalize($fileInfo->getPathname());
+            }
+        } else {
+            throw new \InvalidArgumentException("{$path} is not a file and directory.");
+        }
+    }
+
     public function matches($path)
     {
         // ex: './../hoge/fuga/../test/./conf/config.php' => 'hoge/fuga/../test/./conf/config.php'
@@ -79,6 +95,16 @@ class PhpFileCollection implements \Iterator
         return $matches;
     }
 
+    public function isInBlackList($file)
+    {
+        return in_array($file, $this->blackList);
+    }
+
+    public function isInWhiteList($file)
+    {
+        return empty($this->whiteList) || in_array($file, $this->whiteList);
+    }
+
     public function current()
     {
         return new PhpFile($this->files[$this->position], $this->replacements);
@@ -93,12 +119,22 @@ class PhpFileCollection implements \Iterator
     {
         do {
             $this->position++;
-        } while ($this->valid() && in_array($this->files[$this->position], $this->blackList));
+        } while ($this->valid() && (
+            $this->isInBlackList($this->files[$this->position]) ||
+            !$this->isInWhiteList($this->files[$this->position])
+        ));
     }
 
     public function rewind()
     {
         $this->position = 0;
+
+        while ($this->valid() && (
+            $this->isInBlackList($this->files[$this->position]) ||
+            !$this->isInWhiteList($this->files[$this->position])
+        )) {
+            $this->position++;
+        }
     }
 
     public function valid()

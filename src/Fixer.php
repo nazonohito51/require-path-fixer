@@ -144,6 +144,11 @@ class Fixer
         $this->collection->addBlackList($path);
     }
 
+    public function addWhiteList($path)
+    {
+        $this->collection->addWhiteList($path);
+    }
+
     public function addVariable($variable, $value)
     {
         $this->collection->addReplacement($variable, $value);

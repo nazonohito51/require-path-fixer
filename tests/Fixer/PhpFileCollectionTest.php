@@ -53,6 +53,24 @@ class PhpFileCollectionTest extends TestCase
         $this->assertNotContains(realpath(__DIR__ . '/../fixtures/before/conf/const.php'), $paths);
     }
 
+    public function testAddWhiteList()
+    {
+        $collection = new PhpFileCollection(__DIR__ . '/../fixtures/before');
+        $collection->addWhiteList(__DIR__ . '/../fixtures/before/conf');
+
+        $paths = array();
+        foreach ($collection as $file) {
+            $this->assertInstanceOf(__NAMESPACE__ . '\PhpFile', $file);
+            $paths[] = $file->path();
+        }
+
+        $this->assertCount(2, $paths);
+        $this->assertNotContains(realpath(__DIR__ . '/../fixtures/before/View.php'), $paths);
+        $this->assertNotContains(realpath(__DIR__ . '/../fixtures/before/common/Model.php'), $paths);
+        $this->assertContains(realpath(__DIR__ . '/../fixtures/before/conf/config.php'), $paths);
+        $this->assertContains(realpath(__DIR__ . '/../fixtures/before/conf/const.php'), $paths);
+    }
+
     public function testMatches()
     {
         $modelFilePath = realpath(__DIR__ . '/../fixtures/before/common/Model.php');

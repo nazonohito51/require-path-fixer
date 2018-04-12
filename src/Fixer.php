@@ -125,6 +125,12 @@ class Fixer
             $statement->guessFromWorkingDir(Path::join($this->workingDir, $path));
         } elseif (substr($path, 0, 1) !== '.' && !empty($this->includePaths)) {
             foreach ($this->includePaths as $includePath) {
+                if ($includePath === '.') {
+                    if (empty($this->workingDir)) {
+                        continue;
+                    }
+                    $includePath = $this->workingDir;
+                }
                 $files = $this->collection->matches(Path::join($includePath, $path));
                 if (count($files) === 1) {
                     $statement->guessFromIncludePath($files[0]);
@@ -165,7 +171,8 @@ class Fixer
 
         $this->includePaths = array();
         foreach ($paths as $path) {
-            if (is_dir($dir = realpath($path))) {
+            $dir = ($path !== '.') ? realpath($path) : $path;
+            if (is_dir($dir) || $dir === '.') {
                 $this->includePaths[] = $dir;
             } else {
                 throw new \InvalidArgumentException("{$path} is not a directory.");

@@ -83,7 +83,7 @@ class PhpFileCollection implements \Iterator
             $path = '/' . $path;
         }
 
-        // ex: 'hoge/test/conf/config.php' => '/\/hoge\/test\/conf\/config\.php$/'
+        // ex: 'hoge/test/conf/config.php' => '/hoge\/test\/conf\/config\.php$/'
         $pattern = '/' . preg_quote($path, '/') . '$/';
         $matches = array();
         foreach ($this->files as $file) {

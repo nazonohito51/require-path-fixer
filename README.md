@@ -50,7 +50,7 @@ $fixer->fix($inspectDirPath, "APP_ROOT");       // Fix all files.
 ```
 
 ## Advanced usage
-
+### Define constants and variables
 The following statement will be not replaced, because it is unknown what path COMMON_DIR is.
 
 `require_once COMMON_DIR . '/path/to/file.php';`
@@ -61,6 +61,7 @@ $fixer->addConstant('COMMON_DIR', '/path/to/common/dir/');   // COMMON_DIR will 
 $fixer->addVariable('$smartyDir', '/path/to/smarty/dir/');   // $smartyDir will be replaced to '/path/to/smarty/dir/'
 ```
 
+### Restrict modification target
 If you have files or directories you don't want to modify, use `addBlackList()`.
 ```php
 $fixer->addBlackList($inspectDirPath . '/vendor');
@@ -73,6 +74,7 @@ Or if you want to modify only some files in the repository, use `addWhiteList()`
 $fixer->addWhiteList($inspectDirPath . '/app');
 ```
 
+### Define current directory
 In PHP, the following statement (starting with '.' or '..') determines the path from the current directory.
 
 `require_once './path/to/file.php';`
@@ -80,20 +82,21 @@ In PHP, the following statement (starting with '.' or '..') determines the path 
 Details are written in the [PHP Manual](http://php.net/manual/en/function.include.php).
 If you want to define the current directory, use `setWorkingDir()`.
 When the current directory is defined, this library resolves the above statement from the current directory.
-However, the current directory changes depending on the entry point, and it also dynamically changes using `chdir()`.
+However, originally the current directory changes depending on the entry point, and it also dynamically changes using `chdir()`.
 Please be careful when using it.
 
 ```php
 $fixer->setWorkingDir($inspectDirPath . '/public');
 ```
 
+### Define include_path
 In PHP, the following statement (relative path) determines the path from the include_path.
 
 `require_once 'path/to/file.php';`
 
 If you want to define the include_path, use `setIncludePath()`.
 When include_path is defined, this library resolves the above statement from include_path.
-However, include_path changes dynamically with `set_include_path()`.
+However, originally include_path changes dynamically with `set_include_path()`.
 Please also be careful when using it.
 
 ```php

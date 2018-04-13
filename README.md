@@ -32,6 +32,9 @@ require_once UNKNOWN_CONSTANT . 'path/to/file.php';
 ```
 
 ## Installation
+```
+composer require "nazonohito51/require-path-fixer:~0.1"
+```
 
 ## Usage
 

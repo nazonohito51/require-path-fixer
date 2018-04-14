@@ -113,12 +113,13 @@ class RequireStatement
 
         $this->evalCode = $code;
         $path = eval($code);
-        if (empty($path)) {
-            throw new EvalException($code, $path);
-        }
 
         error_reporting($beforeErrorReporting);
         restore_error_handler();
+
+        if (empty($path)) {
+            throw new EvalException($code, $path);
+        }
 
         return $path;
     }

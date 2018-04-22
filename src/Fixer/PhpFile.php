@@ -32,7 +32,7 @@ class PhpFile
                 $start = $index;
                 $end = null;
                 for (; $index < count($this->tokens); $index++) {
-                    if ($this->tokens[$index] == ';') {
+                    if ($this->tokens[$index] == ';' || (isset($this->tokens[$index][0]) && $this->tokens[$index][0] == T_CLOSE_TAG)) {
                         $end = ++$index;
                         break;
                     }

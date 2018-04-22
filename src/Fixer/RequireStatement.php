@@ -53,7 +53,7 @@ class RequireStatement
                         }
                     }
                     $code .= $this->replaceComplexVariableParsedSyntax($complexVariableParsedSyntaxTokens);
-                } elseif (isset($token[0]) && $token[0] == T_STRING && $token[1] != 'dirname') {
+                } elseif (isset($token[0]) && $token[0] == T_STRING && $token[1] != 'dirname' && $token[1] != 'realpath') {
                     // CONSTANT -> 'replacementText'
                     $code .= $this->replaceToken($token);
                 } elseif (isset($token[0]) && $token[0] == T_VARIABLE) {

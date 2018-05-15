@@ -21,6 +21,12 @@ class Fixer
     public function __construct($dir)
     {
         $this->collection = new PhpFileCollection($dir);
+
+        if (!ini_get('short_open_tag')) {
+            echo "WARNING!\n";
+            echo "'short_open_tag' in php.ini is disabled. If there is a php file using short_open_tag, that will not be replaced.\n";
+            echo "\n\n";
+        }
     }
 
     public function getFiles()
